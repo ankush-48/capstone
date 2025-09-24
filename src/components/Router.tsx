@@ -1,6 +1,7 @@
 import { MemberProvider } from '@/integrations';
 import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
 import { ScrollToTop } from '@/lib/scroll-to-top';
+import { LanguageProvider } from '@/contexts/LanguageContext';
 import Layout from '@/components/Layout';
 import HomePage from '@/components/pages/HomePage';
 import CoursesPage from '@/components/pages/CoursesPage';
@@ -60,8 +61,10 @@ const router = createBrowserRouter([
 
 export default function AppRouter() {
   return (
-    <MemberProvider>
-      <RouterProvider router={router} />
-    </MemberProvider>
+    <LanguageProvider>
+      <MemberProvider>
+        <RouterProvider router={router} />
+      </MemberProvider>
+    </LanguageProvider>
   );
 }

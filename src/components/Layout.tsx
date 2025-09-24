@@ -1,7 +1,9 @@
 import { useMember } from '@/integrations';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { LanguageSelector } from '@/components/ui/language-selector';
 import { 
   BookOpen, 
   User, 
@@ -16,22 +18,23 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Layout() {
   const { member, isAuthenticated, isLoading, actions } = useMember();
+  const { t } = useLanguage();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navigation = [
-    { name: 'Home', href: '/', icon: GraduationCap },
-    { name: 'Courses', href: '/courses', icon: BookOpen },
+    { name: t('nav.home'), href: '/', icon: GraduationCap },
+    { name: t('nav.courses'), href: '/courses', icon: BookOpen },
   ];
 
   const authenticatedNavigation = [
-    { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-    { name: 'Profile', href: '/profile', icon: User },
+    { name: t('nav.dashboard'), href: '/dashboard', icon: LayoutDashboard },
+    { name: t('nav.profile'), href: '/profile', icon: User },
   ];
 
   // Admin navigation (only show for admin users)
   const adminNavigation = [
-    { name: 'Admin', href: '/admin', icon: Settings },
+    { name: t('nav.admin'), href: '/admin', icon: Settings },
   ];
 
   const isActivePath = (path: string) => {
@@ -107,6 +110,7 @@ export default function Layout() {
 
             {/* Auth Section */}
             <div className="hidden md:flex items-center gap-4">
+              <LanguageSelector />
               {isLoading ? (
                 <LoadingSpinner />
               ) : isAuthenticated ? (
@@ -120,7 +124,7 @@ export default function Layout() {
                     size="sm"
                     className="border-white/20 text-gray-400 hover:text-white"
                   >
-                    Sign Out
+                    {t('nav.signOut')}
                   </Button>
                 </div>
               ) : (
@@ -128,7 +132,7 @@ export default function Layout() {
                   onClick={actions.login}
                   className="bg-primary text-primary-foreground hover:bg-primary/90"
                 >
-                  Sign In
+                  {t('nav.signIn')}
                 </Button>
               )}
             </div>
@@ -206,6 +210,9 @@ export default function Layout() {
                   ))}
 
                   <div className="border-t border-white/10 pt-4 mt-4">
+                    <div className="mb-4">
+                      <LanguageSelector />
+                    </div>
                     {isLoading ? (
                       <div className="flex justify-center">
                         <LoadingSpinner />
@@ -223,7 +230,7 @@ export default function Layout() {
                           variant="outline"
                           className="w-full border-white/20 text-gray-400 hover:text-white"
                         >
-                          Sign Out
+                          {t('nav.signOut')}
                         </Button>
                       </div>
                     ) : (
@@ -234,7 +241,7 @@ export default function Layout() {
                         }}
                         className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
                       >
-                        Sign In
+                        {t('nav.signIn')}
                       </Button>
                     )}
                   </div>

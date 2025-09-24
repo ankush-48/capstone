@@ -1,5 +1,6 @@
 // HPI 1.4-G
 import { useMember } from '@/integrations';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -60,34 +61,35 @@ const AnimatedElement = ({ children, className, delay = 0 }: { children: React.R
 
 export default function HomePage() {
   const { isAuthenticated, actions } = useMember();
+  const { t } = useLanguage();
   const [activeFeature, setActiveFeature] = useState(0);
 
   const features = [
     {
       icon: BookOpen,
-      title: "Expert-Led Courses",
-      description: "Dive into a curated catalog of courses designed and taught by industry veterans. Gain practical, real-world skills that are immediately applicable to your career.",
+      title: t('home.features.expertCourses'),
+      description: t('home.features.expertCoursesDesc'),
       imageSrc: "https://static.wixstatic.com/media/f45df3_7af6340e27684dbc8a1b201b6b15e841~mv2.png?originWidth=576&originHeight=576",
       alt: "An industry expert giving a lecture on a complex topic."
     },
     {
       icon: TrendingUp,
-      title: "Progress Tracking",
-      description: "Visualize your learning journey with an intuitive dashboard. Monitor course completion, quiz scores, and skill acquisition to stay motivated and on track.",
+      title: t('home.features.progressTracking'),
+      description: t('home.features.progressTrackingDesc'),
       imageSrc: "https://static.wixstatic.com/media/f45df3_0b955daa214d4a67bae473108c75de11~mv2.png?originWidth=576&originHeight=576",
       alt: "A close-up of a personal progress dashboard with charts and graphs."
     },
     {
       icon: Award,
-      title: "Verified Certificates",
-      description: "Earn recognized certificates upon course completion. Showcase your achievements on your resume and professional networks to validate your new expertise.",
+      title: t('home.features.certificates'),
+      description: t('home.features.certificatesDesc'),
       imageSrc: "https://static.wixstatic.com/media/f45df3_d4e58872114a4d2a82a3ec88903e1a42~mv2.png?originWidth=576&originHeight=576",
       alt: "A digital certificate of completion with a modern design."
     },
     {
       icon: Users,
-      title: "Global Community",
-      description: "Connect with a vibrant community of learners and mentors. Collaborate on projects, ask questions, and grow your professional network in a supportive environment.",
+      title: t('home.features.community'),
+      description: t('home.features.communityDesc'),
       imageSrc: "https://static.wixstatic.com/media/f45df3_e62cef1b6b8d46a485dfa0f85dfe848a~mv2.png?originWidth=576&originHeight=576",
       alt: "An online forum showing collaboration between learners."
     }
@@ -174,31 +176,31 @@ export default function HomePage() {
               <AnimatedElement>
                 <p className="font-paragraph text-primary text-lg mb-4">01 / Introduction</p>
                 <h1 className="text-5xl md:text-7xl font-bold font-heading text-on-surface mb-6 z-10 relative">
-                  Empower Your Future
+                  {t('home.hero.title')}
                 </h1>
               </AnimatedElement>
               <AnimatedElement delay={150}>
                 <p className="text-lg text-foreground/80 mb-8 max-w-xl">
-                  Master new skills with our cutting-edge learning platform. Access expert-led courses, track your progress, and earn certificates in emerging technologies.
+                  {t('home.hero.subtitle')}
                 </p>
               </AnimatedElement>
               <AnimatedElement delay={300} className="flex flex-col sm:flex-row gap-4">
                 {isAuthenticated ? (
                   <>
                     <Button asChild size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
-                      <Link to="/dashboard">Go to Dashboard</Link>
+                      <Link to="/dashboard">{t('home.hero.goToDashboard')}</Link>
                     </Button>
                     <Button asChild variant="outline" size="lg" className="border-primary text-primary hover:bg-primary/10 transition-colors">
-                      <Link to="/courses">Browse Courses</Link>
+                      <Link to="/courses">{t('home.hero.browseCourses')}</Link>
                     </Button>
                   </>
                 ) : (
                   <>
                     <Button onClick={actions.login} size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
-                      Get Started
+                      {t('home.hero.getStarted')}
                     </Button>
                     <Button asChild variant="outline" size="lg" className="border-primary text-primary hover:bg-primary/10 transition-colors">
-                      <Link to="/courses">Explore Courses</Link>
+                      <Link to="/courses">{t('home.hero.exploreCourses')}</Link>
                     </Button>
                   </>
                 )}
@@ -291,17 +293,17 @@ export default function HomePage() {
           <AnimatedElement className="text-center mb-16">
             <p className="font-paragraph text-primary text-lg mb-4">04 / Proven Results</p>
             <h2 className="text-4xl md:text-5xl font-bold font-heading text-on-surface mb-4">
-              Join a Thriving Community
+              {t('home.stats.title')}
             </h2>
             <p className="text-lg text-foreground/80 max-w-3xl mx-auto">
-              Our platform empowers thousands of learners to achieve their goals. The numbers speak for themselves.
+              {t('home.stats.subtitle')}
             </p>
           </AnimatedElement>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { number: "10,000+", label: "Active Learners" },
-              { number: "50+", label: "Expert Courses" },
-              { number: "95%", label: "Completion Rate" }
+              { number: "10,000+", label: t('home.stats.activeLearners') },
+              { number: "50+", label: t('home.stats.expertCourses') },
+              { number: "95%", label: t('home.stats.completionRate') }
             ].map((stat, index) => (
               <AnimatedElement key={stat.label} delay={index * 150}>
                 <div className="relative p-8 text-center rounded-lg glassmorphic-card">
@@ -326,10 +328,10 @@ export default function HomePage() {
           <AnimatedElement className="text-center mb-16">
             <p className="font-paragraph text-primary text-lg mb-4">05 / Platform Features</p>
             <h2 className="text-4xl md:text-5xl font-bold font-heading text-on-surface mb-4">
-              Why Choose Our Platform?
+              {t('home.features.title')}
             </h2>
             <p className="text-lg text-foreground/80 max-w-3xl mx-auto">
-              Experience the future of learning with our innovative approach to skill development.
+              {t('home.features.subtitle')}
             </p>
           </AnimatedElement>
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
@@ -387,18 +389,18 @@ export default function HomePage() {
           <AnimatedElement>
             <p className="font-paragraph text-primary text-lg mb-4">06 / Get Started</p>
             <h2 className="text-4xl md:text-5xl font-bold font-heading text-on-surface mb-6">
-              Ready to Transform Your Career?
+              {t('home.cta.title')}
             </h2>
             <p className="text-lg text-foreground/80 mb-8">
-              Join thousands of learners who have already started their journey to success.
+              {t('home.cta.subtitle')}
             </p>
             {isAuthenticated ? (
               <Button asChild size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 text-lg px-8 py-6 transition-colors">
-                <Link to="/dashboard">Continue Learning</Link>
+                <Link to="/dashboard">{t('home.cta.continueLearning')}</Link>
               </Button>
             ) : (
               <Button onClick={actions.login} size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 text-lg px-8 py-6 transition-colors">
-                Start Learning Today
+                {t('home.cta.startLearning')}
               </Button>
             )}
           </AnimatedElement>
