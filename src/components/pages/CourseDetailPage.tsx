@@ -81,6 +81,7 @@ function CourseDetailContent() {
         return Play;
       case 'text':
         return FileText;
+      case 'assessment':
       case 'quiz':
         return CheckCircle;
       default:

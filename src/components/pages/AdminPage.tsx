@@ -22,7 +22,8 @@ import {
   BarChart3,
   Settings,
   Upload,
-  Download
+  Download,
+  Wand2
 } from 'lucide-react';
 
 function AdminContent() {
@@ -295,6 +296,18 @@ function AdminContent() {
                     <Download className="w-4 h-4 mr-2" />
                     Export Data
                   </Button>
+                  <Button 
+                    onClick={async () => {
+                      const { createStructuredCourseContent } = await import('../../scripts/createCourseContent');
+                      await createStructuredCourseContent();
+                      await fetchData();
+                    }}
+                    variant="outline" 
+                    className="border-primary/30 text-primary hover:bg-primary/10"
+                  >
+                    <Wand2 className="w-4 h-4 mr-2" />
+                    Generate Course Content
+                  </Button>
                   <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
                     <DialogTrigger asChild>
                       <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
@@ -474,9 +487,10 @@ function AdminContent() {
                             <SelectValue placeholder="Select type" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="video">Video</SelectItem>
-                            <SelectItem value="text">Text</SelectItem>
-                            <SelectItem value="quiz">Quiz</SelectItem>
+                            <SelectItem value="video">Video Lesson</SelectItem>
+                            <SelectItem value="text">Text Content</SelectItem>
+                            <SelectItem value="assessment">Major Assessment</SelectItem>
+                            <SelectItem value="quiz">Quick Quiz</SelectItem>
                             <SelectItem value="assignment">Assignment</SelectItem>
                           </SelectContent>
                         </Select>
@@ -621,6 +635,11 @@ function AdminContent() {
                             {content.downloadableNotes && (
                               <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30 text-xs">
                                 Notes
+                              </Badge>
+                            )}
+                            {(content.contentType === 'assessment' || content.contentType === 'quiz') && (
+                              <Badge className="bg-red-500/20 text-red-400 border-red-500/30 text-xs">
+                                Assessment
                               </Badge>
                             )}
                           </div>

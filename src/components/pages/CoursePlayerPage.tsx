@@ -42,7 +42,7 @@ function CoursePlayerContent() {
   const [currentContentIndex, setCurrentContentIndex] = useState(0);
   const [completedContent, setCompletedContent] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
-  const [quizAnswers, setQuizAnswers] = useState<{ [key: string]: number }>({});
+  const [quizAnswers, setQuizAnswers] = useState<{ [key: string]: number | string }>({});
   const [selectedLanguage, setSelectedLanguage] = useState<'hindi' | 'tamil' | 'telugu' | 'none'>('none');
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
@@ -113,8 +113,8 @@ function CoursePlayerContent() {
     }
   };
 
-  const handleQuizAnswer = (questionId: string, answerIndex: number) => {
-    setQuizAnswers(prev => ({ ...prev, [questionId]: answerIndex }));
+  const handleQuizAnswer = (questionId: string | number, answer: number | string) => {
+    setQuizAnswers(prev => ({ ...prev, [questionId]: answer }));
   };
 
   const getCaptionUrl = (content: CourseContent) => {
@@ -278,34 +278,101 @@ function CoursePlayerContent() {
           </div>
         );
 
+      case 'assessment':
       case 'quiz':
+        const assessmentData = currentContent.assessmentQuestions ? JSON.parse(currentContent.assessmentQuestions) : null;
+        const scoringData = currentContent.scoringSystem ? JSON.parse(currentContent.scoringSystem) : null;
+        const questions = assessmentData?.questions || mockQuiz;
+        
         return (
           <div className="space-y-6">
-            <h3 className="text-xl font-heading text-white mb-4">Knowledge Check</h3>
-            {mockQuiz.map((question, index) => (
-              <Card key={question.id} className="bg-surface/50 border-white/10">
+            <div className="bg-surface/50 border border-white/10 rounded-lg p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-2xl font-heading text-white">Major Assessment</h3>
+                <div className="flex items-center gap-4 text-sm font-paragraph text-gray-400">
+                  {scoringData?.totalPoints && (
+                    <span>Total Points: {scoringData.totalPoints}</span>
+                  )}
+                  {currentContent.timeLimitMinutes && (
+                    <span>Time Limit: {currentContent.timeLimitMinutes} minutes</span>
+                  )}
+                </div>
+              </div>
+              
+              {scoringData?.passingScore && (
+                <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 mb-6">
+                  <p className="text-primary font-paragraph text-sm">
+                    <strong>Passing Score:</strong> {scoringData.passingScore}/{scoringData.totalPoints} points ({Math.round((scoringData.passingScore / scoringData.totalPoints) * 100)}%)
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {questions.map((question: any, index: number) => (
+              <Card key={question.id || index} className="bg-surface/50 border-white/10">
                 <CardContent className="p-6">
                   <h4 className="font-heading text-white mb-4">
-                    {index + 1}. {question.question}
+                    Question {index + 1}: {question.question}
                   </h4>
-                  <div className="space-y-2">
-                    {question.options.map((option, optionIndex) => (
-                      <button
-                        key={optionIndex}
-                        onClick={() => handleQuizAnswer(question.id, optionIndex)}
-                        className={`w-full text-left p-3 rounded-lg border transition-all ${
-                          quizAnswers[question.id] === optionIndex
-                            ? 'border-primary bg-primary/10 text-primary'
-                            : 'border-white/20 text-gray-300 hover:border-white/40'
-                        }`}
-                      >
-                        {String.fromCharCode(65 + optionIndex)}. {option}
-                      </button>
-                    ))}
-                  </div>
+                  
+                  {question.type === 'essay' ? (
+                    <div className="space-y-3">
+                      <textarea
+                        className="w-full h-32 p-3 bg-background/50 border border-white/20 rounded-lg text-white placeholder:text-gray-500 resize-vertical"
+                        placeholder="Type your answer here..."
+                        value={quizAnswers[question.id || index] || ''}
+                        onChange={(e) => handleQuizAnswer(question.id || index, e.target.value)}
+                      />
+                      {question.points && (
+                        <p className="text-sm font-paragraph text-gray-400">
+                          Points: {question.points}
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {question.options?.map((option: string, optionIndex: number) => (
+                        <button
+                          key={optionIndex}
+                          onClick={() => handleQuizAnswer(question.id || index, optionIndex)}
+                          className={`w-full text-left p-3 rounded-lg border transition-all ${
+                            quizAnswers[question.id || index] === optionIndex
+                              ? 'border-primary bg-primary/10 text-primary'
+                              : 'border-white/20 text-gray-300 hover:border-white/40'
+                          }`}
+                        >
+                          {String.fromCharCode(65 + optionIndex)}. {option}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             ))}
+
+            <Card className="bg-surface/50 border-white/10">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="font-heading text-white mb-2">Assessment Progress</h4>
+                    <p className="text-sm font-paragraph text-gray-400">
+                      {Object.keys(quizAnswers).length} of {questions.length} questions answered
+                    </p>
+                    {currentContent.timeLimitMinutes && (
+                      <p className="text-xs font-paragraph text-gray-500 mt-1">
+                        Time remaining: {currentContent.timeLimitMinutes} minutes
+                      </p>
+                    )}
+                  </div>
+                  <Button 
+                    className="bg-primary text-primary-foreground hover:bg-primary/90"
+                    disabled={Object.keys(quizAnswers).length < questions.length}
+                  >
+                    Submit Assessment
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         );
 
@@ -343,6 +410,7 @@ function CoursePlayerContent() {
     switch (type?.toLowerCase()) {
       case 'video':
         return Play;
+      case 'assessment':
       case 'quiz':
         return HelpCircle;
       default:

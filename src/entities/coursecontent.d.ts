@@ -6,6 +6,16 @@ export interface CourseContent {
   _id: string;
   _createdDate?: Date;
   _updatedDate?: Date;
+  /** @wixFieldType url */
+  downloadableNotes?: string;
+  /** @wixFieldType url */
+  captionsTamil?: string;
+  /** @wixFieldType url */
+  captionsTelugu?: string;
+  /** @wixFieldType url */
+  videoLectureUrl?: string;
+  /** @wixFieldType url */
+  captionsHindi?: string;
   /** @wixFieldType text */
   title?: string;
   /** @wixFieldType text */
@@ -22,14 +32,10 @@ export interface CourseContent {
   thumbnailImage?: string;
   /** @wixFieldType number */
   estimatedDurationMinutes?: number;
-  /** @wixFieldType url */
-  videoLectureUrl?: string;
-  /** @wixFieldType url */
-  captionsHindi?: string;
-  /** @wixFieldType url */
-  captionsTamil?: string;
-  /** @wixFieldType url */
-  captionsTelugu?: string;
-  /** @wixFieldType url */
-  downloadableNotes?: string;
+  /** @wixFieldType text */
+  assessmentQuestions?: string;
+  /** @wixFieldType text */
+  scoringSystem?: string;
+  /** @wixFieldType number */
+  timeLimitMinutes?: number;
 }
