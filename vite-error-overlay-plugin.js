@@ -1,4 +1,23 @@
-class ErrorOverlay {
+export const sendErrorToParent = err => {
+  // Send error to parent using framewire
+  if (globalThis.framewire) {
+    try {
+      const { sendMessageToParent, EditorEventMessages } = globalThis.framewire;
+      sendMessageToParent({
+        type: EditorEventMessages.CLIENT_ERROR,
+        clientErrorData: {
+          errorType: 'error',
+          message: err?.message || 'Unknown error',
+          stack: err?.stack || 'No stack trace available',
+        }
+      });
+    } catch (error) {
+      console.warn('Failed to send error to parent via framewire:', error?.message);
+    }
+  }
+}
+
+export class ErrorOverlay {
   static MESSAGE_TITLE = `We're having trouble displaying this page`;
   static MESSAGE_DESCRIPTION = `Something didn't load correctly on our end.`;
 
@@ -7,9 +26,8 @@ class ErrorOverlay {
       <link rel="stylesheet" href="https://static.parastorage.com/services/picasso-editor-page/f8267b91c2f1bf1ea5fa81a2788ab7b0acb2e6663c71a4cf74417530/569.chunk.min.css">
       <style>
         .error-overlay {
-          position: fixed;
-          top: 0;
-          left: 0;
+          align-items: center;
+          justify-content: center;
           width: 100%;
           height: 100%;
           background: white;
@@ -115,19 +133,7 @@ class ErrorOverlay {
 	}
 
 	sendErrorToParent(err) {
-		// Send error to parent using @wix/framewire
-    import('@wix/framewire').then(({ sendMessageToParent, EditorEventMessages }) => {
-      sendMessageToParent({
-        type: EditorEventMessages.CLIENT_ERROR,
-        clientErrorData: {
-          errorType: 'error',
-          message: err?.message || 'Unknown error',
-          stack: err?.stack || 'No stack trace available',
-        }
-      });
-    }).catch(() => {
-      // ignore
-    });
+		sendErrorToParent(err);
 	}
 }
 
