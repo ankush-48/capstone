@@ -22,4 +22,14 @@ export interface CourseContent {
   thumbnailImage?: string;
   /** @wixFieldType number */
   estimatedDurationMinutes?: number;
+  /** @wixFieldType url */
+  videoLectureUrl?: string;
+  /** @wixFieldType url */
+  captionsHindi?: string;
+  /** @wixFieldType url */
+  captionsTamil?: string;
+  /** @wixFieldType url */
+  captionsTelugu?: string;
+  /** @wixFieldType url */
+  downloadableNotes?: string;
 }

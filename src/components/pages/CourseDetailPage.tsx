@@ -17,7 +17,8 @@ import {
   FileText, 
   Award,
   ArrowLeft,
-  CheckCircle
+  CheckCircle,
+  Download
 } from 'lucide-react';
 import { Image } from '@/components/ui/image';
 
@@ -209,6 +210,10 @@ function CourseDetailContent() {
                 <div className="space-y-4">
                   {courseContent.map((content, index) => {
                     const IconComponent = getContentIcon(content.contentType || '');
+                    const hasVideo = content.videoLectureUrl;
+                    const hasCaptions = content.captionsHindi || content.captionsTamil || content.captionsTelugu;
+                    const hasNotes = content.downloadableNotes;
+                    
                     return (
                       <Card key={content._id} className="bg-surface/50 border-white/10 backdrop-blur-sm">
                         <CardContent className="p-4">
@@ -225,6 +230,28 @@ function CourseDetailContent() {
                                   {content.description}
                                 </p>
                               )}
+                              
+                              {/* Content Features */}
+                              <div className="flex items-center gap-2 mt-2">
+                                {hasVideo && (
+                                  <span className="inline-flex items-center gap-1 text-xs font-paragraph text-green-400">
+                                    <Play className="w-3 h-3" />
+                                    Video
+                                  </span>
+                                )}
+                                {hasCaptions && (
+                                  <span className="inline-flex items-center gap-1 text-xs font-paragraph text-purple-400">
+                                    <FileText className="w-3 h-3" />
+                                    Multi-language
+                                  </span>
+                                )}
+                                {hasNotes && (
+                                  <span className="inline-flex items-center gap-1 text-xs font-paragraph text-orange-400">
+                                    <Download className="w-3 h-3" />
+                                    Notes
+                                  </span>
+                                )}
+                              </div>
                             </div>
                             {content.estimatedDurationMinutes && (
                               <div className="flex items-center gap-1 text-xs font-paragraph text-gray-500">
@@ -299,6 +326,18 @@ function CourseDetailContent() {
                       <div className="flex items-center gap-2 text-gray-400">
                         <BookOpen className="w-4 h-4" />
                         <span>{courseContent.length} lessons</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-gray-400">
+                        <Play className="w-4 h-4" />
+                        <span>HD video lectures</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-gray-400">
+                        <FileText className="w-4 h-4" />
+                        <span>Multi-language captions</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-gray-400">
+                        <Download className="w-4 h-4" />
+                        <span>Downloadable resources</span>
                       </div>
                       <div className="flex items-center gap-2 text-gray-400">
                         <Clock className="w-4 h-4" />

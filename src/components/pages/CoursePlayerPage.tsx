@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { MemberProtectedRoute } from '@/components/ui/member-protected-route';
 import { 
   ArrowLeft,
@@ -17,7 +18,13 @@ import {
   FileText,
   HelpCircle,
   Clock,
-  BookOpen
+  BookOpen,
+  Download,
+  Subtitles,
+  Volume2,
+  VolumeX,
+  Maximize,
+  Settings
 } from 'lucide-react';
 
 interface QuizQuestion {
@@ -36,6 +43,10 @@ function CoursePlayerContent() {
   const [completedContent, setCompletedContent] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [quizAnswers, setQuizAnswers] = useState<{ [key: string]: number }>({});
+  const [selectedLanguage, setSelectedLanguage] = useState<'hindi' | 'tamil' | 'telugu' | 'none'>('none');
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+  const [showVideoControls, setShowVideoControls] = useState(true);
 
   // Mock quiz data
   const mockQuiz: QuizQuestion[] = [
@@ -106,6 +117,33 @@ function CoursePlayerContent() {
     setQuizAnswers(prev => ({ ...prev, [questionId]: answerIndex }));
   };
 
+  const getCaptionUrl = (content: CourseContent) => {
+    switch (selectedLanguage) {
+      case 'hindi':
+        return content.captionsHindi;
+      case 'tamil':
+        return content.captionsTamil;
+      case 'telugu':
+        return content.captionsTelugu;
+      default:
+        return null;
+    }
+  };
+
+  const downloadNotes = (content: CourseContent) => {
+    if (content.downloadableNotes) {
+      window.open(content.downloadableNotes, '_blank');
+    }
+  };
+
+  const toggleVideoPlay = () => {
+    setIsVideoPlaying(!isVideoPlaying);
+  };
+
+  const toggleMute = () => {
+    setIsMuted(!isMuted);
+  };
+
   const renderContent = () => {
     if (!currentContent) return null;
 
@@ -114,14 +152,129 @@ function CoursePlayerContent() {
     switch (contentType) {
       case 'video':
         return (
-          <div className="bg-black rounded-lg aspect-video flex items-center justify-center">
-            <div className="text-center">
-              <Play className="w-16 h-16 text-primary mx-auto mb-4" />
-              <p className="text-white font-paragraph">Video Player</p>
-              <p className="text-gray-400 text-sm mt-2">
-                {currentContent.title}
-              </p>
+          <div className="space-y-4">
+            {/* Video Player */}
+            <div className="relative bg-black rounded-lg aspect-video overflow-hidden group">
+              {currentContent.videoLectureUrl ? (
+                <div className="relative w-full h-full">
+                  <video
+                    className="w-full h-full object-cover"
+                    controls={showVideoControls}
+                    poster={currentContent.thumbnailImage}
+                    onPlay={() => setIsVideoPlaying(true)}
+                    onPause={() => setIsVideoPlaying(false)}
+                  >
+                    <source src={currentContent.videoLectureUrl} type="video/mp4" />
+                    {getCaptionUrl(currentContent) && (
+                      <track
+                        kind="subtitles"
+                        src={getCaptionUrl(currentContent)!}
+                        srcLang={selectedLanguage}
+                        label={selectedLanguage.charAt(0).toUpperCase() + selectedLanguage.slice(1)}
+                        default={selectedLanguage !== 'none'}
+                      />
+                    )}
+                    Your browser does not support the video tag.
+                  </video>
+                  
+                  {/* Custom Video Controls Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="absolute bottom-4 left-4 right-4 flex items-center gap-4">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={toggleVideoPlay}
+                        className="text-white hover:bg-white/20"
+                      >
+                        {isVideoPlaying ? <VolumeX className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                      </Button>
+                      
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={toggleMute}
+                        className="text-white hover:bg-white/20"
+                      >
+                        {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                      </Button>
+                      
+                      <div className="flex-1" />
+                      
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="text-white hover:bg-white/20"
+                      >
+                        <Settings className="w-4 h-4" />
+                      </Button>
+                      
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="text-white hover:bg-white/20"
+                      >
+                        <Maximize className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center justify-center h-full">
+                  <div className="text-center">
+                    <Play className="w-16 h-16 text-primary mx-auto mb-4" />
+                    <p className="text-white font-paragraph">Video Player</p>
+                    <p className="text-gray-400 text-sm mt-2">
+                      {currentContent.title}
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
+
+            {/* Video Controls */}
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between p-4 bg-surface/50 rounded-lg">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <Subtitles className="w-4 h-4 text-primary" />
+                  <span className="text-sm font-paragraph text-gray-300">Captions:</span>
+                </div>
+                <Select value={selectedLanguage} onValueChange={(value: 'hindi' | 'tamil' | 'telugu' | 'none') => setSelectedLanguage(value)}>
+                  <SelectTrigger className="w-32 bg-background/50 border-white/20 text-white">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">None</SelectItem>
+                    {currentContent.captionsHindi && <SelectItem value="hindi">Hindi</SelectItem>}
+                    {currentContent.captionsTamil && <SelectItem value="tamil">Tamil</SelectItem>}
+                    {currentContent.captionsTelugu && <SelectItem value="telugu">Telugu</SelectItem>}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              {currentContent.downloadableNotes && (
+                <Button
+                  onClick={() => downloadNotes(currentContent)}
+                  variant="outline"
+                  size="sm"
+                  className="border-primary/30 text-primary hover:bg-primary/10"
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  Download Notes
+                </Button>
+              )}
+            </div>
+
+            {/* Video Description */}
+            {currentContent.description && (
+              <Card className="bg-surface/50 border-white/10">
+                <CardContent className="p-4">
+                  <h4 className="font-heading text-white font-medium mb-2">About this lecture</h4>
+                  <p className="font-paragraph text-gray-300 text-sm leading-relaxed">
+                    {currentContent.description}
+                  </p>
+                </CardContent>
+              </Card>
+            )}
           </div>
         );
 

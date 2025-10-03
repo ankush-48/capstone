@@ -53,7 +53,12 @@ function AdminContent() {
     orderIndex: 0,
     estimatedDurationMinutes: 0,
     textContent: '',
-    contentUrl: ''
+    contentUrl: '',
+    videoLectureUrl: '',
+    captionsHindi: '',
+    captionsTamil: '',
+    captionsTelugu: '',
+    downloadableNotes: ''
   });
 
   useEffect(() => {
@@ -123,7 +128,12 @@ function AdminContent() {
         orderIndex: 0,
         estimatedDurationMinutes: 0,
         textContent: '',
-        contentUrl: ''
+        contentUrl: '',
+        videoLectureUrl: '',
+        captionsHindi: '',
+        captionsTamil: '',
+        captionsTelugu: '',
+        downloadableNotes: ''
       });
     } catch (error) {
       console.error('Error creating content:', error);
@@ -502,6 +512,68 @@ function AdminContent() {
                           />
                         </div>
                       </div>
+                      
+                      {newContent.contentType === 'video' && (
+                        <>
+                          <div>
+                            <Label htmlFor="videoUrl">Video Lecture URL</Label>
+                            <Input
+                              id="videoUrl"
+                              value={newContent.videoLectureUrl}
+                              onChange={(e) => setNewContent({...newContent, videoLectureUrl: e.target.value})}
+                              className="bg-background/50 border-white/20 text-white"
+                              placeholder="https://example.com/video.mp4"
+                            />
+                          </div>
+                          
+                          <div className="space-y-4">
+                            <Label className="text-white font-medium">Caption Files</Label>
+                            <div className="grid grid-cols-1 gap-3">
+                              <div>
+                                <Label htmlFor="captionsHindi" className="text-sm text-gray-300">Hindi Captions (.vtt/.srt)</Label>
+                                <Input
+                                  id="captionsHindi"
+                                  value={newContent.captionsHindi}
+                                  onChange={(e) => setNewContent({...newContent, captionsHindi: e.target.value})}
+                                  className="bg-background/50 border-white/20 text-white"
+                                  placeholder="https://example.com/captions-hindi.vtt"
+                                />
+                              </div>
+                              <div>
+                                <Label htmlFor="captionsTamil" className="text-sm text-gray-300">Tamil Captions (.vtt/.srt)</Label>
+                                <Input
+                                  id="captionsTamil"
+                                  value={newContent.captionsTamil}
+                                  onChange={(e) => setNewContent({...newContent, captionsTamil: e.target.value})}
+                                  className="bg-background/50 border-white/20 text-white"
+                                  placeholder="https://example.com/captions-tamil.vtt"
+                                />
+                              </div>
+                              <div>
+                                <Label htmlFor="captionsTelugu" className="text-sm text-gray-300">Telugu Captions (.vtt/.srt)</Label>
+                                <Input
+                                  id="captionsTelugu"
+                                  value={newContent.captionsTelugu}
+                                  onChange={(e) => setNewContent({...newContent, captionsTelugu: e.target.value})}
+                                  className="bg-background/50 border-white/20 text-white"
+                                  placeholder="https://example.com/captions-telugu.vtt"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div>
+                            <Label htmlFor="downloadableNotes">Downloadable Notes URL</Label>
+                            <Input
+                              id="downloadableNotes"
+                              value={newContent.downloadableNotes}
+                              onChange={(e) => setNewContent({...newContent, downloadableNotes: e.target.value})}
+                              className="bg-background/50 border-white/20 text-white"
+                              placeholder="https://example.com/lecture-notes.pdf"
+                            />
+                          </div>
+                        </>
+                      )}
                     </div>
                     <div className="flex justify-end gap-3 mt-6">
                       <Button variant="outline" onClick={() => setIsContentDialogOpen(false)}>
@@ -535,6 +607,21 @@ function AdminContent() {
                               <span className="text-xs font-paragraph text-gray-500">
                                 {content.estimatedDurationMinutes}min
                               </span>
+                            )}
+                            {content.videoLectureUrl && (
+                              <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">
+                                Video
+                              </Badge>
+                            )}
+                            {(content.captionsHindi || content.captionsTamil || content.captionsTelugu) && (
+                              <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 text-xs">
+                                Captions
+                              </Badge>
+                            )}
+                            {content.downloadableNotes && (
+                              <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30 text-xs">
+                                Notes
+                              </Badge>
                             )}
                           </div>
                           {content.description && (
