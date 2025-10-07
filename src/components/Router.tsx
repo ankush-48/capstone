@@ -10,6 +10,7 @@ import CoursePlayerPage from '@/components/pages/CoursePlayerPage';
 import DashboardPage from '@/components/pages/DashboardPage';
 import ProfilePage from '@/components/pages/ProfilePage';
 import AdminPage from '@/components/pages/AdminPage';
+import CertificatesPage from '@/components/pages/CertificatesPage';
 
 const router = createBrowserRouter([
   {
@@ -44,6 +45,10 @@ const router = createBrowserRouter([
       {
         path: "profile",
         element: <ProfilePage />,
+      },
+      {
+        path: "certificates",
+        element: <CertificatesPage />,
       },
       {
         path: "admin",

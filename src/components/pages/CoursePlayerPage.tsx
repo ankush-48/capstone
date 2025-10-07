@@ -10,6 +10,7 @@ import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { MemberProtectedRoute } from '@/components/ui/member-protected-route';
+import { CertificateGenerator } from '@/components/ui/certificate-generator';
 import { 
   ArrowLeft,
   ArrowRight,
@@ -24,7 +25,8 @@ import {
   Volume2,
   VolumeX,
   Maximize,
-  Settings
+  Settings,
+  Award
 } from 'lucide-react';
 
 interface QuizQuestion {
@@ -47,6 +49,7 @@ function CoursePlayerContent() {
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [showVideoControls, setShowVideoControls] = useState(true);
+  const [courseCompleted, setCourseCompleted] = useState(false);
 
   // Mock quiz data
   const mockQuiz: QuizQuestion[] = [
@@ -104,6 +107,9 @@ function CoursePlayerContent() {
     }
     if (currentContentIndex < courseContent.length - 1) {
       setCurrentContentIndex(currentContentIndex + 1);
+    } else {
+      // Course completed
+      setCourseCompleted(true);
     }
   };
 
@@ -143,6 +149,39 @@ function CoursePlayerContent() {
   const toggleMute = () => {
     setIsMuted(!isMuted);
   };
+
+  // Certificate Download Component
+  function CertificateDownloadButton({ course }: { course: Courses }) {
+    const { downloadCertificate, downloadCertificatePDF } = CertificateGenerator({
+      course,
+      completionDate: new Date(),
+      onDownload: () => {
+        console.log(`Certificate downloaded for ${course.titleEn}`);
+      }
+    });
+
+    return (
+      <div className="flex gap-2">
+        <Button
+          onClick={downloadCertificate}
+          size="sm"
+          className="bg-primary text-primary-foreground hover:bg-primary/90"
+        >
+          <Award className="w-4 h-4 mr-2" />
+          Download PNG
+        </Button>
+        <Button
+          onClick={downloadCertificatePDF}
+          size="sm"
+          variant="outline"
+          className="border-primary/30 text-primary hover:bg-primary/10"
+        >
+          <FileText className="w-4 h-4 mr-2" />
+          Download PDF
+        </Button>
+      </div>
+    );
+  }
 
   const renderContent = () => {
     if (!currentContent) return null;
@@ -557,13 +596,29 @@ function CoursePlayerContent() {
               </div>
 
               {currentContentIndex === courseContent.length - 1 ? (
-                <Button
-                  onClick={handleNext}
-                  className="bg-primary text-primary-foreground hover:bg-primary/90"
-                >
-                  Complete Course
-                  <CheckCircle className="w-4 h-4 ml-2" />
-                </Button>
+                courseCompleted ? (
+                  <div className="flex items-center gap-4">
+                    <div className="text-center">
+                      <div className="text-sm font-paragraph text-gray-400 mb-1">
+                        🎉 Course Completed!
+                      </div>
+                      <div className="text-xs font-paragraph text-gray-500">
+                        Download your certificate
+                      </div>
+                    </div>
+                    {course && (
+                      <CertificateDownloadButton course={course} />
+                    )}
+                  </div>
+                ) : (
+                  <Button
+                    onClick={handleNext}
+                    className="bg-primary text-primary-foreground hover:bg-primary/90"
+                  >
+                    Complete Course
+                    <CheckCircle className="w-4 h-4 ml-2" />
+                  </Button>
+                )
               ) : (
                 <Button
                   onClick={handleNext}

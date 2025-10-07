@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { MemberProtectedRoute } from '@/components/ui/member-protected-route';
+import { CertificateGenerator } from '@/components/ui/certificate-generator';
 import { 
   BookOpen, 
   Clock, 
@@ -16,7 +17,9 @@ import {
   Play,
   Download,
   Calendar,
-  Target
+  Target,
+  FileText,
+  CheckCircle
 } from 'lucide-react';
 import { Image } from '@/components/ui/image';
 
@@ -254,6 +257,12 @@ function DashboardContent() {
                         </Link>
                       </Button>
                       <Button asChild variant="outline" className="w-full justify-start border-white/20 text-gray-400 hover:text-white">
+                        <Link to="/certificates">
+                          <Award className="w-4 h-4 mr-2" />
+                          My Certificates
+                        </Link>
+                      </Button>
+                      <Button asChild variant="outline" className="w-full justify-start border-white/20 text-gray-400 hover:text-white">
                         <Link to="/profile">
                           <Target className="w-4 h-4 mr-2" />
                           Update Profile
@@ -276,21 +285,48 @@ function DashboardContent() {
                     <CardContent>
                       {completedCourses.length > 0 ? (
                         <div className="space-y-3">
-                          {completedCourses.map((course) => (
-                            <div key={course._id} className="flex items-center justify-between p-3 bg-background/30 rounded-lg">
-                              <div>
-                                <div className="font-paragraph text-white text-sm font-medium">
-                                  {course.titleEn}
+                          {completedCourses.map((course) => {
+                            const { downloadCertificate, downloadCertificatePDF } = CertificateGenerator({
+                              course,
+                              completionDate: new Date(),
+                              onDownload: () => {
+                                console.log(`Certificate downloaded for ${course.titleEn}`);
+                              }
+                            });
+
+                            return (
+                              <div key={course._id} className="flex items-center justify-between p-3 bg-background/30 rounded-lg">
+                                <div className="flex-1">
+                                  <div className="font-paragraph text-white text-sm font-medium">
+                                    {course.titleEn}
+                                  </div>
+                                  <div className="font-paragraph text-gray-400 text-xs">
+                                    Completed • Certificate Available
+                                  </div>
                                 </div>
-                                <div className="font-paragraph text-gray-400 text-xs">
-                                  Completed
+                                <div className="flex gap-2">
+                                  <Button 
+                                    size="sm" 
+                                    variant="ghost" 
+                                    onClick={downloadCertificate}
+                                    className="text-primary hover:text-primary/80 hover:bg-primary/10"
+                                    title="Download PNG Certificate"
+                                  >
+                                    <Download className="w-4 h-4" />
+                                  </Button>
+                                  <Button 
+                                    size="sm" 
+                                    variant="ghost" 
+                                    onClick={downloadCertificatePDF}
+                                    className="text-secondary hover:text-secondary/80 hover:bg-secondary/10"
+                                    title="Download PDF Certificate"
+                                  >
+                                    <FileText className="w-4 h-4" />
+                                  </Button>
                                 </div>
                               </div>
-                              <Button size="sm" variant="ghost" className="text-primary hover:text-primary/80">
-                                <Download className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       ) : (
                         <div className="text-center py-6">

@@ -11,7 +11,8 @@ import {
   Menu,
   X,
   GraduationCap,
-  Settings
+  Settings,
+  Award
 } from 'lucide-react';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -29,6 +30,7 @@ export default function Layout() {
 
   const authenticatedNavigation = [
     { name: t('nav.dashboard'), href: '/dashboard', icon: LayoutDashboard },
+    { name: 'Certificates', href: '/certificates', icon: Award },
     { name: t('nav.profile'), href: '/profile', icon: User },
   ];
 

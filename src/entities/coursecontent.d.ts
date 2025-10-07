@@ -8,6 +8,12 @@ export interface CourseContent {
   _updatedDate?: Date;
   /** @wixFieldType url */
   downloadableNotes?: string;
+  /** @wixFieldType number */
+  timeLimitMinutes?: number;
+  /** @wixFieldType text */
+  scoringSystem?: string;
+  /** @wixFieldType text */
+  assessmentQuestions?: string;
   /** @wixFieldType url */
   captionsTamil?: string;
   /** @wixFieldType url */
@@ -32,10 +38,4 @@ export interface CourseContent {
   thumbnailImage?: string;
   /** @wixFieldType number */
   estimatedDurationMinutes?: number;
-  /** @wixFieldType text */
-  assessmentQuestions?: string;
-  /** @wixFieldType text */
-  scoringSystem?: string;
-  /** @wixFieldType number */
-  timeLimitMinutes?: number;
 }
