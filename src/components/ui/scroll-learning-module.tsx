@@ -278,7 +278,87 @@ export function ScrollLearningModule({ content, onComplete, onProgress, courseNa
             
             {/* Download Notes Button */}
             <PDFNotesGenerator 
-              content={content} 
+              content={{
+                ...content,
+                learningObjectives: content.learningObjectives || JSON.stringify([
+                  { id: '1', text: `Master the core concepts of ${content.title || 'this learning module'}`, completed: false },
+                  { id: '2', text: 'Apply knowledge through interactive exercises and activities', completed: false },
+                  { id: '3', text: 'Understand practical applications in real-world scenarios', completed: false },
+                  { id: '4', text: 'Develop critical thinking skills for problem-solving', completed: false }
+                ]),
+                keyTakeaways: content.keyTakeaways || JSON.stringify([
+                  { id: '1', text: 'Interactive learning enhances retention and understanding', icon: 'brain' },
+                  { id: '2', text: 'Progressive disclosure prevents cognitive overload', icon: 'activity' },
+                  { id: '3', text: 'Hands-on practice reinforces theoretical concepts', icon: 'target' },
+                  { id: '4', text: 'Regular review and reflection improve long-term retention', icon: 'lightbulb' }
+                ]),
+                interactiveElements: content.interactiveElements || JSON.stringify([
+                  {
+                    id: '1',
+                    type: 'highlight',
+                    title: 'Core Principle',
+                    content: 'Active engagement with content leads to better learning outcomes than passive consumption.',
+                    position: 20
+                  },
+                  {
+                    id: '2',
+                    type: 'definition',
+                    title: 'Progressive Learning',
+                    content: 'A methodology that introduces concepts gradually, building complexity as understanding develops.',
+                    position: 40
+                  },
+                  {
+                    id: '3',
+                    type: 'tip',
+                    title: 'Study Strategy',
+                    content: 'Take breaks between sections to allow your brain to process and consolidate new information.',
+                    position: 60
+                  },
+                  {
+                    id: '4',
+                    type: 'example',
+                    title: 'Real-World Application',
+                    content: 'These learning principles are used by top educational institutions and corporate training programs worldwide.',
+                    position: 80
+                  }
+                ]),
+                moduleContent: content.moduleContent || `
+                  <div class="space-y-6">
+                    <h3 class="text-xl font-semibold text-primary mb-3">${content.title || 'Interactive Learning Module'}</h3>
+                    <p>${content.description || 'This interactive learning module is designed to provide you with comprehensive understanding through engaging, scroll-based content delivery.'}</p>
+                    
+                    <h3 class="text-xl font-semibold text-primary mb-3">Module Structure</h3>
+                    <p>This module uses a progressive disclosure approach, revealing information as you scroll through the content. This method helps prevent cognitive overload and allows you to absorb information at your own pace.</p>
+                    
+                    <h3 class="text-xl font-semibold text-primary mb-3">Interactive Elements</h3>
+                    <p>Throughout the module, you'll encounter various interactive elements including:</p>
+                    <ul class="list-disc pl-6 space-y-1">
+                      <li><strong>Highlights:</strong> Key concepts and important information</li>
+                      <li><strong>Definitions:</strong> Clear explanations of technical terms</li>
+                      <li><strong>Tips:</strong> Practical advice and study strategies</li>
+                      <li><strong>Examples:</strong> Real-world applications and case studies</li>
+                    </ul>
+                    
+                    <h3 class="text-xl font-semibold text-primary mb-3">Learning Objectives</h3>
+                    <p>By completing this module, you will achieve specific learning outcomes that build upon each other to create a comprehensive understanding of the subject matter.</p>
+                    
+                    <h3 class="text-xl font-semibold text-primary mb-3">Assessment and Activities</h3>
+                    <p>The module may include interactive activities and assessments designed to test your understanding and provide immediate feedback on your progress.</p>
+                    
+                    <h3 class="text-xl font-semibold text-primary mb-3">Study Tips</h3>
+                    <ul class="list-disc pl-6 space-y-1">
+                      <li>Read through the entire module first to get an overview</li>
+                      <li>Take notes on key concepts as you progress</li>
+                      <li>Pay special attention to interactive elements</li>
+                      <li>Complete any activities or assessments</li>
+                      <li>Review the key takeaways at the end</li>
+                    </ul>
+                    
+                    <h3 class="text-xl font-semibold text-primary mb-3">Time Management</h3>
+                    <p>This module is designed to be completed in approximately ${content.estimatedDurationMinutes || 30} minutes. However, you can take as much time as you need to fully understand the concepts.</p>
+                  </div>
+                `
+              }}
               courseName={courseName}
               onDownload={() => console.log('Notes downloaded for:', content.title)}
             />

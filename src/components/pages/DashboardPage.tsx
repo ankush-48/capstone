@@ -224,39 +224,134 @@ function DashboardContent() {
                                   <PDFNotesGenerator
                                     content={{
                                       ...courseContent[index % courseContent.length],
-                                      title: `${course.titleEn} - Course Overview`,
+                                      title: `${course.titleEn} - Comprehensive Study Guide`,
                                       description: course.descriptionEn,
                                       learningObjectives: JSON.stringify([
-                                        { id: '1', text: 'Complete all course modules', completed: false },
-                                        { id: '2', text: 'Apply learned concepts in practice', completed: false },
-                                        { id: '3', text: 'Earn course certificate', completed: false }
+                                        { id: '1', text: `Master the fundamental concepts and principles of ${course.category || 'this subject area'}`, completed: false },
+                                        { id: '2', text: 'Apply theoretical knowledge through practical exercises and real-world scenarios', completed: false },
+                                        { id: '3', text: 'Develop problem-solving skills specific to industry challenges', completed: false },
+                                        { id: '4', text: 'Build a portfolio of projects demonstrating your expertise', completed: false },
+                                        { id: '5', text: 'Prepare for professional certification and career advancement', completed: false }
                                       ]),
                                       keyTakeaways: JSON.stringify([
-                                        { id: '1', text: 'Master the core concepts of this course', icon: 'brain' },
-                                        { id: '2', text: 'Gain practical skills through hands-on learning', icon: 'activity' },
-                                        { id: '3', text: 'Build a strong foundation for advanced topics', icon: 'target' }
+                                        { id: '1', text: `${course.category || 'This field'} requires both theoretical understanding and practical application`, icon: 'brain' },
+                                        { id: '2', text: 'Hands-on practice is essential for mastering complex concepts', icon: 'activity' },
+                                        { id: '3', text: 'Industry best practices evolve rapidly - continuous learning is key', icon: 'target' },
+                                        { id: '4', text: 'Building a strong foundation enables advanced skill development', icon: 'lightbulb' },
+                                        { id: '5', text: 'Professional networks and mentorship accelerate career growth', icon: 'users' }
+                                      ]),
+                                      interactiveElements: JSON.stringify([
+                                        {
+                                          id: '1',
+                                          type: 'highlight',
+                                          title: 'Industry Insight',
+                                          content: `${course.category || 'This field'} professionals are in high demand, with average salaries ranging from $70,000 to $150,000+ depending on experience and specialization.`,
+                                          position: 15
+                                        },
+                                        {
+                                          id: '2',
+                                          type: 'definition',
+                                          title: 'Core Competency',
+                                          content: `The ability to analyze complex problems, design effective solutions, and implement them using industry-standard tools and methodologies.`,
+                                          position: 35
+                                        },
+                                        {
+                                          id: '3',
+                                          type: 'tip',
+                                          title: 'Study Strategy',
+                                          content: 'Focus on understanding the "why" behind each concept, not just the "how". This deeper understanding will help you adapt to new technologies and methodologies.',
+                                          position: 55
+                                        },
+                                        {
+                                          id: '4',
+                                          type: 'example',
+                                          title: 'Real-World Application',
+                                          content: `Companies like Google, Microsoft, and Amazon regularly use these concepts in their daily operations, making this knowledge directly applicable to industry work.`,
+                                          position: 75
+                                        }
                                       ]),
                                       moduleContent: `
                                         <div class="space-y-6">
-                                          <h3 class="text-xl font-semibold text-primary mb-3">Course Overview</h3>
+                                          <h3 class="text-xl font-semibold text-primary mb-3">Course Overview: ${course.titleEn}</h3>
                                           <p>${course.descriptionEn}</p>
                                           
-                                          <h3 class="text-xl font-semibold text-primary mb-3">What You'll Learn</h3>
-                                          <p>This comprehensive course will guide you through essential concepts and practical applications. You'll engage with interactive content, complete hands-on activities, and build real-world skills.</p>
+                                          <h3 class="text-xl font-semibold text-primary mb-3">Learning Path & Curriculum</h3>
+                                          <p>This comprehensive course is structured to take you from foundational concepts to advanced applications. Each module builds upon the previous one, ensuring a solid understanding before progressing to more complex topics.</p>
                                           
-                                          <h3 class="text-xl font-semibold text-primary mb-3">Course Structure</h3>
-                                          <p>The course is designed with a scroll-based learning approach, featuring progressive disclosure of concepts, interactive elements, and activity-based learning to ensure maximum retention and engagement.</p>
+                                          <h4 class="text-lg font-semibold text-primary mb-2">Module 1: Foundations & Core Concepts</h4>
+                                          <p>Begin with the fundamental principles that form the backbone of ${course.category || 'this field'}. You'll learn essential terminology, basic methodologies, and industry standards that every professional should know.</p>
                                           
-                                          <h3 class="text-xl font-semibold text-primary mb-3">Prerequisites</h3>
-                                          <p>This course is suitable for ${course.difficultyLevel?.toLowerCase() || 'all'} level learners. Basic familiarity with the subject area is helpful but not required.</p>
+                                          <h4 class="text-lg font-semibold text-primary mb-2">Module 2: Practical Applications</h4>
+                                          <p>Move from theory to practice with hands-on exercises and real-world scenarios. This module focuses on applying what you've learned to solve actual problems you'll encounter in professional settings.</p>
                                           
-                                          <h3 class="text-xl font-semibold text-primary mb-3">Certification</h3>
-                                          <p>Upon successful completion, you'll receive a verified certificate that you can share on professional networks and include in your portfolio.</p>
+                                          <h4 class="text-lg font-semibold text-primary mb-2">Module 3: Advanced Techniques</h4>
+                                          <p>Explore sophisticated approaches and cutting-edge methodologies used by industry leaders. Learn optimization techniques, best practices, and how to handle complex, multi-faceted challenges.</p>
+                                          
+                                          <h4 class="text-lg font-semibold text-primary mb-2">Module 4: Industry Integration</h4>
+                                          <p>Understand how your new skills fit into the broader industry landscape. Learn about career paths, professional development opportunities, and how to stay current with evolving trends.</p>
+                                          
+                                          <h3 class="text-xl font-semibold text-primary mb-3">Key Skills You'll Develop</h3>
+                                          <ul class="list-disc pl-6 space-y-2">
+                                            <li><strong>Analytical Thinking:</strong> Break down complex problems into manageable components</li>
+                                            <li><strong>Technical Proficiency:</strong> Master industry-standard tools and technologies</li>
+                                            <li><strong>Problem-Solving:</strong> Develop systematic approaches to finding effective solutions</li>
+                                            <li><strong>Communication:</strong> Present technical concepts clearly to diverse audiences</li>
+                                            <li><strong>Collaboration:</strong> Work effectively in team environments and cross-functional projects</li>
+                                          </ul>
+                                          
+                                          <h3 class="text-xl font-semibold text-primary mb-3">Industry Context & Applications</h3>
+                                          <p>The skills taught in this course are directly applicable across multiple industries including technology, finance, healthcare, manufacturing, and consulting. Graduates often pursue roles such as:</p>
+                                          <ul class="list-disc pl-6 space-y-1">
+                                            <li>Senior Analyst</li>
+                                            <li>Technical Consultant</li>
+                                            <li>Project Manager</li>
+                                            <li>Solution Architect</li>
+                                            <li>Team Lead</li>
+                                          </ul>
+                                          
+                                          <h3 class="text-xl font-semibold text-primary mb-3">Prerequisites & Preparation</h3>
+                                          <p>This course is designed for ${course.difficultyLevel?.toLowerCase() || 'all'} level learners. While no specific prerequisites are required, familiarity with basic concepts in the field will be helpful. We recommend:</p>
+                                          <ul class="list-disc pl-6 space-y-1">
+                                            <li>Basic understanding of fundamental principles</li>
+                                            <li>Willingness to engage with hands-on exercises</li>
+                                            <li>Access to a computer for practical assignments</li>
+                                            <li>Commitment to approximately ${course.durationMinutes ? Math.round(course.durationMinutes / 60) : '10-15'} hours of study time</li>
+                                          </ul>
+                                          
+                                          <h3 class="text-xl font-semibold text-primary mb-3">Assessment & Certification</h3>
+                                          <p>Your progress will be evaluated through a combination of:</p>
+                                          <ul class="list-disc pl-6 space-y-1">
+                                            <li><strong>Interactive Quizzes:</strong> Test your understanding of key concepts</li>
+                                            <li><strong>Practical Projects:</strong> Apply your skills to real-world scenarios</li>
+                                            <li><strong>Peer Reviews:</strong> Learn from and provide feedback to fellow learners</li>
+                                            <li><strong>Final Assessment:</strong> Comprehensive evaluation of your mastery</li>
+                                          </ul>
+                                          
+                                          <p>Upon successful completion, you'll receive a verified certificate that demonstrates your competency to employers and can be shared on professional networks like LinkedIn.</p>
+                                          
+                                          <h3 class="text-xl font-semibold text-primary mb-3">Study Tips for Success</h3>
+                                          <ul class="list-disc pl-6 space-y-2">
+                                            <li><strong>Set a Schedule:</strong> Dedicate specific times for learning to maintain consistency</li>
+                                            <li><strong>Take Notes:</strong> Use this study guide to supplement your learning with personal insights</li>
+                                            <li><strong>Practice Regularly:</strong> Apply concepts immediately to reinforce understanding</li>
+                                            <li><strong>Join Discussions:</strong> Engage with the learning community for additional perspectives</li>
+                                            <li><strong>Seek Help:</strong> Don't hesitate to ask questions when concepts are unclear</li>
+                                          </ul>
+                                          
+                                          <h3 class="text-xl font-semibold text-primary mb-3">Additional Resources</h3>
+                                          <p>To supplement your learning, consider exploring:</p>
+                                          <ul class="list-disc pl-6 space-y-1">
+                                            <li>Industry publications and research papers</li>
+                                            <li>Professional associations and networking groups</li>
+                                            <li>Open-source projects and community contributions</li>
+                                            <li>Conferences and webinars in your field of interest</li>
+                                            <li>Mentorship opportunities with industry professionals</li>
+                                          </ul>
                                         </div>
                                       `
                                     }}
                                     courseName={course.titleEn}
-                                    onDownload={() => console.log('Course overview notes downloaded for:', course.titleEn)}
+                                    onDownload={() => console.log('Comprehensive study guide downloaded for:', course.titleEn)}
                                   />
                                 </div>
                               )}

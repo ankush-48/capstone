@@ -272,7 +272,67 @@ function CourseDetailContent() {
                                     </div>
                                   )}
                                   <PDFNotesGenerator
-                                    content={content}
+                                    content={{
+                                      ...content,
+                                      learningObjectives: content.learningObjectives || JSON.stringify([
+                                        { id: '1', text: `Master the core concepts covered in ${content.title || 'this module'}`, completed: false },
+                                        { id: '2', text: 'Apply theoretical knowledge through practical exercises', completed: false },
+                                        { id: '3', text: 'Understand real-world applications and use cases', completed: false },
+                                        { id: '4', text: 'Develop problem-solving skills specific to this topic', completed: false }
+                                      ]),
+                                      keyTakeaways: content.keyTakeaways || JSON.stringify([
+                                        { id: '1', text: 'Understanding fundamentals is crucial for advanced applications', icon: 'brain' },
+                                        { id: '2', text: 'Practice and repetition reinforce learning', icon: 'activity' },
+                                        { id: '3', text: 'Real-world examples help bridge theory and practice', icon: 'target' },
+                                        { id: '4', text: 'Continuous learning keeps skills current and relevant', icon: 'lightbulb' }
+                                      ]),
+                                      interactiveElements: content.interactiveElements || JSON.stringify([
+                                        {
+                                          id: '1',
+                                          type: 'highlight',
+                                          title: 'Key Concept',
+                                          content: 'This module introduces fundamental principles that form the foundation for more advanced topics.',
+                                          position: 25
+                                        },
+                                        {
+                                          id: '2',
+                                          type: 'tip',
+                                          title: 'Study Tip',
+                                          content: 'Take notes on key concepts and review them regularly to reinforce your understanding.',
+                                          position: 50
+                                        },
+                                        {
+                                          id: '3',
+                                          type: 'example',
+                                          title: 'Practical Application',
+                                          content: 'These concepts are widely used in industry settings and professional environments.',
+                                          position: 75
+                                        }
+                                      ]),
+                                      moduleContent: content.moduleContent || `
+                                        <div class="space-y-6">
+                                          <h3 class="text-xl font-semibold text-primary mb-3">${content.title || 'Module Overview'}</h3>
+                                          <p>${content.description || 'This module provides comprehensive coverage of essential concepts and practical applications.'}</p>
+                                          
+                                          <h3 class="text-xl font-semibold text-primary mb-3">Learning Outcomes</h3>
+                                          <p>By the end of this module, you will have a solid understanding of the core principles and be able to apply them in practical scenarios.</p>
+                                          
+                                          <h3 class="text-xl font-semibold text-primary mb-3">Key Topics Covered</h3>
+                                          <ul class="list-disc pl-6 space-y-1">
+                                            <li>Fundamental concepts and terminology</li>
+                                            <li>Practical applications and use cases</li>
+                                            <li>Best practices and industry standards</li>
+                                            <li>Common challenges and solutions</li>
+                                          </ul>
+                                          
+                                          <h3 class="text-xl font-semibold text-primary mb-3">Practical Exercises</h3>
+                                          <p>This module includes hands-on activities designed to reinforce your learning and provide practical experience with the concepts covered.</p>
+                                          
+                                          <h3 class="text-xl font-semibold text-primary mb-3">Assessment</h3>
+                                          <p>Your understanding will be evaluated through interactive quizzes and practical assignments that test both theoretical knowledge and practical application.</p>
+                                        </div>
+                                      `
+                                    }}
                                     courseName={course?.titleEn}
                                     onDownload={() => console.log('Module notes downloaded for:', content.title)}
                                   />

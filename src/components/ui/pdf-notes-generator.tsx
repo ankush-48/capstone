@@ -182,7 +182,22 @@ export function PDFNotesGenerator({ content, courseName, onDownload }: PDFNotesG
               ${content.moduleContent.replace(/class="/g, 'style="').replace(/text-primary/g, 'color: #64FFDA;')}
             </div>
           </div>
-          ` : ''}
+          ` : content.textContent ? `
+          <div class="section">
+            <h2 class="section-title">Course Content</h2>
+            <div class="content-text">
+              <p>${content.textContent}</p>
+            </div>
+          </div>
+          ` : `
+          <div class="section">
+            <h2 class="section-title">Course Content</h2>
+            <div class="content-text">
+              <p>This comprehensive learning module covers essential concepts and practical applications in ${courseName || 'your chosen field'}.</p>
+              <p>The content is designed to provide you with both theoretical understanding and hands-on experience, ensuring you can apply what you learn in real-world scenarios.</p>
+            </div>
+          </div>
+          `}
 
           ${interactiveElements.length > 0 ? `
           <div class="section">
@@ -289,6 +304,15 @@ export function PDFNotesGenerator({ content, courseName, onDownload }: PDFNotesG
         // Strip HTML tags for plain text
         const plainText = content.moduleContent.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
         notesContent += `${plainText}\n\n`;
+      } else if (content.textContent) {
+        notesContent += `COURSE CONTENT:\n`;
+        notesContent += `${'-'.repeat(15)}\n`;
+        notesContent += `${content.textContent}\n\n`;
+      } else {
+        notesContent += `COURSE CONTENT:\n`;
+        notesContent += `${'-'.repeat(15)}\n`;
+        notesContent += `This comprehensive learning module covers essential concepts and practical applications in ${courseName || 'your chosen field'}.\n\n`;
+        notesContent += `The content is designed to provide you with both theoretical understanding and hands-on experience, ensuring you can apply what you learn in real-world scenarios.\n\n`;
       }
 
       // Interactive Elements
