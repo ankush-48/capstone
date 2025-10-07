@@ -77,15 +77,16 @@ function CourseDetailContent() {
 
   const getContentIcon = (type: string) => {
     switch (type?.toLowerCase()) {
-      case 'video':
-        return Play;
+      case 'module':
+      case 'scroll':
       case 'text':
-        return FileText;
+      case 'video': // Convert video to module icon
+        return BookOpen;
       case 'assessment':
       case 'quiz':
         return CheckCircle;
       default:
-        return BookOpen;
+        return BookOpen; // Default to module icon
     }
   };
 
@@ -211,8 +212,8 @@ function CourseDetailContent() {
                 <div className="space-y-4">
                   {courseContent.map((content, index) => {
                     const IconComponent = getContentIcon(content.contentType || '');
-                    const hasVideo = content.videoLectureUrl;
-                    const hasCaptions = content.captionsHindi || content.captionsTamil || content.captionsTelugu;
+                    const hasInteractiveElements = content.interactiveElements;
+                    const hasActivity = content.activityType && content.activityData;
                     const hasNotes = content.downloadableNotes;
                     
                     return (
@@ -224,7 +225,7 @@ function CourseDetailContent() {
                             </div>
                             <div className="flex-1">
                               <h3 className="font-heading text-white font-medium">
-                                {content.title || `Lesson ${index + 1}`}
+                                {content.title || `Module ${index + 1}`}
                               </h3>
                               {content.description && (
                                 <p className="text-sm font-paragraph text-gray-400 mt-1">
@@ -234,16 +235,20 @@ function CourseDetailContent() {
                               
                               {/* Content Features */}
                               <div className="flex items-center gap-2 mt-2">
-                                {hasVideo && (
-                                  <span className="inline-flex items-center gap-1 text-xs font-paragraph text-green-400">
-                                    <Play className="w-3 h-3" />
-                                    Video
-                                  </span>
-                                )}
-                                {hasCaptions && (
+                                <span className="inline-flex items-center gap-1 text-xs font-paragraph text-primary">
+                                  <BookOpen className="w-3 h-3" />
+                                  Interactive Module
+                                </span>
+                                {hasInteractiveElements && (
                                   <span className="inline-flex items-center gap-1 text-xs font-paragraph text-purple-400">
                                     <FileText className="w-3 h-3" />
-                                    Multi-language
+                                    Interactive Elements
+                                  </span>
+                                )}
+                                {hasActivity && (
+                                  <span className="inline-flex items-center gap-1 text-xs font-paragraph text-green-400">
+                                    <CheckCircle className="w-3 h-3" />
+                                    Activity
                                   </span>
                                 )}
                                 {hasNotes && (
@@ -326,15 +331,15 @@ function CourseDetailContent() {
                     <div className="space-y-3 text-sm font-paragraph">
                       <div className="flex items-center gap-2 text-gray-400">
                         <BookOpen className="w-4 h-4" />
-                        <span>{courseContent.length} lessons</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-gray-400">
-                        <Play className="w-4 h-4" />
-                        <span>HD video lectures</span>
+                        <span>{courseContent.length} interactive modules</span>
                       </div>
                       <div className="flex items-center gap-2 text-gray-400">
                         <FileText className="w-4 h-4" />
-                        <span>Multi-language captions</span>
+                        <span>Scroll-based learning</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-gray-400">
+                        <CheckCircle className="w-4 h-4" />
+                        <span>Interactive elements</span>
                       </div>
                       <div className="flex items-center gap-2 text-gray-400">
                         <Download className="w-4 h-4" />

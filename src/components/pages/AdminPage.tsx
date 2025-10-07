@@ -55,11 +55,13 @@ function AdminContent() {
     estimatedDurationMinutes: 0,
     textContent: '',
     contentUrl: '',
-    videoLectureUrl: '',
-    captionsHindi: '',
-    captionsTamil: '',
-    captionsTelugu: '',
-    downloadableNotes: ''
+    downloadableNotes: '',
+    learningObjectives: '',
+    keyTakeaways: '',
+    interactiveElements: '',
+    activityData: '',
+    moduleContent: '',
+    activityType: ''
   });
 
   useEffect(() => {
@@ -130,11 +132,13 @@ function AdminContent() {
         estimatedDurationMinutes: 0,
         textContent: '',
         contentUrl: '',
-        videoLectureUrl: '',
-        captionsHindi: '',
-        captionsTamil: '',
-        captionsTelugu: '',
-        downloadableNotes: ''
+        downloadableNotes: '',
+        learningObjectives: '',
+        keyTakeaways: '',
+        interactiveElements: '',
+        activityData: '',
+        moduleContent: '',
+        activityType: ''
       });
     } catch (error) {
       console.error('Error creating content:', error);
@@ -470,125 +474,151 @@ function AdminContent() {
                     <DialogHeader>
                       <DialogTitle className="font-heading">Create New Content</DialogTitle>
                     </DialogHeader>
-                    <div className="space-y-4">
-                      <div>
-                        <Label htmlFor="contentTitle">Title</Label>
-                        <Input
-                          id="contentTitle"
-                          value={newContent.title}
-                          onChange={(e) => setNewContent({...newContent, title: e.target.value})}
-                          className="bg-background/50 border-white/20 text-white"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="contentType">Content Type</Label>
-                        <Select value={newContent.contentType} onValueChange={(value) => setNewContent({...newContent, contentType: value})}>
-                          <SelectTrigger className="bg-background/50 border-white/20 text-white">
-                            <SelectValue placeholder="Select type" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="video">Video Lesson</SelectItem>
-                            <SelectItem value="text">Text Content</SelectItem>
-                            <SelectItem value="assessment">Major Assessment</SelectItem>
-                            <SelectItem value="quiz">Quick Quiz</SelectItem>
-                            <SelectItem value="assignment">Assignment</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <Label htmlFor="contentDescription">Description</Label>
-                        <Textarea
-                          id="contentDescription"
-                          value={newContent.description}
-                          onChange={(e) => setNewContent({...newContent, description: e.target.value})}
-                          className="bg-background/50 border-white/20 text-white"
-                        />
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-4">
                         <div>
-                          <Label htmlFor="orderIndex">Order Index</Label>
+                          <Label htmlFor="contentTitle">Title</Label>
                           <Input
-                            id="orderIndex"
-                            type="number"
-                            value={newContent.orderIndex}
-                            onChange={(e) => setNewContent({...newContent, orderIndex: parseInt(e.target.value) || 0})}
+                            id="contentTitle"
+                            value={newContent.title}
+                            onChange={(e) => setNewContent({...newContent, title: e.target.value})}
                             className="bg-background/50 border-white/20 text-white"
                           />
                         </div>
                         <div>
-                          <Label htmlFor="duration">Duration (minutes)</Label>
-                          <Input
-                            id="duration"
-                            type="number"
-                            value={newContent.estimatedDurationMinutes}
-                            onChange={(e) => setNewContent({...newContent, estimatedDurationMinutes: parseInt(e.target.value) || 0})}
+                          <Label htmlFor="contentType">Content Type</Label>
+                          <Select value={newContent.contentType} onValueChange={(value) => setNewContent({...newContent, contentType: value})}>
+                            <SelectTrigger className="bg-background/50 border-white/20 text-white">
+                              <SelectValue placeholder="Select type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="module">Interactive Module</SelectItem>
+                              <SelectItem value="scroll">Scroll-based Learning</SelectItem>
+                              <SelectItem value="text">Text Content</SelectItem>
+                              <SelectItem value="assessment">Major Assessment</SelectItem>
+                              <SelectItem value="quiz">Quick Quiz</SelectItem>
+                              <SelectItem value="activity">Hands-on Activity</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label htmlFor="contentDescription">Description</Label>
+                          <Textarea
+                            id="contentDescription"
+                            value={newContent.description}
+                            onChange={(e) => setNewContent({...newContent, description: e.target.value})}
                             className="bg-background/50 border-white/20 text-white"
                           />
                         </div>
-                      </div>
-                      
-                      {newContent.contentType === 'video' && (
-                        <>
+                        <div className="grid grid-cols-2 gap-4">
                           <div>
-                            <Label htmlFor="videoUrl">Video Lecture URL</Label>
+                            <Label htmlFor="orderIndex">Order Index</Label>
                             <Input
-                              id="videoUrl"
-                              value={newContent.videoLectureUrl}
-                              onChange={(e) => setNewContent({...newContent, videoLectureUrl: e.target.value})}
+                              id="orderIndex"
+                              type="number"
+                              value={newContent.orderIndex}
+                              onChange={(e) => setNewContent({...newContent, orderIndex: parseInt(e.target.value) || 0})}
                               className="bg-background/50 border-white/20 text-white"
-                              placeholder="https://example.com/video.mp4"
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="duration">Duration (minutes)</Label>
+                            <Input
+                              id="duration"
+                              type="number"
+                              value={newContent.estimatedDurationMinutes}
+                              onChange={(e) => setNewContent({...newContent, estimatedDurationMinutes: parseInt(e.target.value) || 0})}
+                              className="bg-background/50 border-white/20 text-white"
+                            />
+                          </div>
+                        </div>
+                        
+                        {/* Learning Module Fields */}
+                        <div className="space-y-4">
+                          <Label className="text-white font-medium">Learning Module Content</Label>
+                          
+                          <div>
+                            <Label htmlFor="learningObjectives" className="text-sm text-gray-300">Learning Objectives (JSON format)</Label>
+                            <Textarea
+                              id="learningObjectives"
+                              value={newContent.learningObjectives || ''}
+                              onChange={(e) => setNewContent({...newContent, learningObjectives: e.target.value})}
+                              className="bg-background/50 border-white/20 text-white"
+                              placeholder='[{"id": "1", "text": "Understand key concepts", "completed": false}]'
                             />
                           </div>
                           
-                          <div className="space-y-4">
-                            <Label className="text-white font-medium">Caption Files</Label>
-                            <div className="grid grid-cols-1 gap-3">
-                              <div>
-                                <Label htmlFor="captionsHindi" className="text-sm text-gray-300">Hindi Captions (.vtt/.srt)</Label>
-                                <Input
-                                  id="captionsHindi"
-                                  value={newContent.captionsHindi}
-                                  onChange={(e) => setNewContent({...newContent, captionsHindi: e.target.value})}
-                                  className="bg-background/50 border-white/20 text-white"
-                                  placeholder="https://example.com/captions-hindi.vtt"
-                                />
-                              </div>
-                              <div>
-                                <Label htmlFor="captionsTamil" className="text-sm text-gray-300">Tamil Captions (.vtt/.srt)</Label>
-                                <Input
-                                  id="captionsTamil"
-                                  value={newContent.captionsTamil}
-                                  onChange={(e) => setNewContent({...newContent, captionsTamil: e.target.value})}
-                                  className="bg-background/50 border-white/20 text-white"
-                                  placeholder="https://example.com/captions-tamil.vtt"
-                                />
-                              </div>
-                              <div>
-                                <Label htmlFor="captionsTelugu" className="text-sm text-gray-300">Telugu Captions (.vtt/.srt)</Label>
-                                <Input
-                                  id="captionsTelugu"
-                                  value={newContent.captionsTelugu}
-                                  onChange={(e) => setNewContent({...newContent, captionsTelugu: e.target.value})}
-                                  className="bg-background/50 border-white/20 text-white"
-                                  placeholder="https://example.com/captions-telugu.vtt"
-                                />
-                              </div>
-                            </div>
+                          <div>
+                            <Label htmlFor="keyTakeaways" className="text-sm text-gray-300">Key Takeaways (JSON format)</Label>
+                            <Textarea
+                              id="keyTakeaways"
+                              value={newContent.keyTakeaways || ''}
+                              onChange={(e) => setNewContent({...newContent, keyTakeaways: e.target.value})}
+                              className="bg-background/50 border-white/20 text-white"
+                              placeholder='[{"id": "1", "text": "Key insight", "icon": "brain"}]'
+                            />
+                          </div>
+                          
+                          <div>
+                            <Label htmlFor="interactiveElements" className="text-sm text-gray-300">Interactive Elements (JSON format)</Label>
+                            <Textarea
+                              id="interactiveElements"
+                              value={newContent.interactiveElements || ''}
+                              onChange={(e) => setNewContent({...newContent, interactiveElements: e.target.value})}
+                              className="bg-background/50 border-white/20 text-white"
+                              placeholder='[{"id": "1", "type": "highlight", "title": "Key Point", "content": "Important information", "position": 25}]'
+                            />
+                          </div>
+                          
+                          <div>
+                            <Label htmlFor="moduleContent" className="text-sm text-gray-300">Module Content (HTML)</Label>
+                            <Textarea
+                              id="moduleContent"
+                              value={newContent.moduleContent || ''}
+                              onChange={(e) => setNewContent({...newContent, moduleContent: e.target.value})}
+                              className="bg-background/50 border-white/20 text-white h-32"
+                              placeholder='<div class="space-y-6"><p>Module content here...</p></div>'
+                            />
+                          </div>
+                          
+                          <div>
+                            <Label htmlFor="activityType" className="text-sm text-gray-300">Activity Type</Label>
+                            <Select value={newContent.activityType || ''} onValueChange={(value) => setNewContent({...newContent, activityType: value})}>
+                              <SelectTrigger className="bg-background/50 border-white/20 text-white">
+                                <SelectValue placeholder="Select activity type" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="all">No Activity</SelectItem>
+                                <SelectItem value="quiz">Quiz</SelectItem>
+                                <SelectItem value="drag-drop">Drag & Drop</SelectItem>
+                                <SelectItem value="reflection">Reflection</SelectItem>
+                                <SelectItem value="case-study">Case Study</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          
+                          <div>
+                            <Label htmlFor="activityData" className="text-sm text-gray-300">Activity Data (JSON format)</Label>
+                            <Textarea
+                              id="activityData"
+                              value={newContent.activityData || ''}
+                              onChange={(e) => setNewContent({...newContent, activityData: e.target.value})}
+                              className="bg-background/50 border-white/20 text-white"
+                              placeholder='{"questions": [{"id": "1", "question": "What is...?", "type": "multiple-choice", "options": ["A", "B"], "correctAnswer": 0}]}'
+                            />
                           </div>
                           
                           <div>
                             <Label htmlFor="downloadableNotes">Downloadable Notes URL</Label>
                             <Input
                               id="downloadableNotes"
-                              value={newContent.downloadableNotes}
+                              value={newContent.downloadableNotes || ''}
                               onChange={(e) => setNewContent({...newContent, downloadableNotes: e.target.value})}
                               className="bg-background/50 border-white/20 text-white"
-                              placeholder="https://example.com/lecture-notes.pdf"
+                              placeholder="https://example.com/notes.pdf"
                             />
                           </div>
-                        </>
-                      )}
-                    </div>
+                        </div>
+                      </div>
                     <div className="flex justify-end gap-3 mt-6">
                       <Button variant="outline" onClick={() => setIsContentDialogOpen(false)}>
                         Cancel
@@ -612,7 +642,7 @@ function AdminContent() {
                           </h3>
                           <div className="flex items-center gap-4 mt-2">
                             <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs">
-                              {content.contentType || 'Unknown'}
+                              {content.contentType || 'Module'}
                             </Badge>
                             <span className="text-xs font-paragraph text-gray-500">
                               Order: {content.orderIndex || 0}
@@ -622,14 +652,14 @@ function AdminContent() {
                                 {content.estimatedDurationMinutes}min
                               </span>
                             )}
-                            {content.videoLectureUrl && (
+                            {content.learningObjectives && (
                               <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">
-                                Video
+                                Objectives
                               </Badge>
                             )}
-                            {(content.captionsHindi || content.captionsTamil || content.captionsTelugu) && (
+                            {content.interactiveElements && (
                               <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 text-xs">
-                                Captions
+                                Interactive
                               </Badge>
                             )}
                             {content.downloadableNotes && (
@@ -637,9 +667,9 @@ function AdminContent() {
                                 Notes
                               </Badge>
                             )}
-                            {(content.contentType === 'assessment' || content.contentType === 'quiz') && (
+                            {content.activityType && (
                               <Badge className="bg-red-500/20 text-red-400 border-red-500/30 text-xs">
-                                Assessment
+                                {content.activityType}
                               </Badge>
                             )}
                           </div>

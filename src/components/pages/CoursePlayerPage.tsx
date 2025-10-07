@@ -8,33 +8,23 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { MemberProtectedRoute } from '@/components/ui/member-protected-route';
 import { CertificateGenerator } from '@/components/ui/certificate-generator';
+import { ScrollLearningModule } from '@/components/ui/scroll-learning-module';
+import { ActivityComponent, Activity } from '@/components/ui/activity-components';
 import { 
   ArrowLeft,
   ArrowRight,
   CheckCircle,
-  Play,
   FileText,
-  HelpCircle,
   Clock,
   BookOpen,
   Download,
-  Subtitles,
-  Volume2,
-  VolumeX,
-  Maximize,
-  Settings,
-  Award
+  Award,
+  Activity as ActivityIcon,
+  Brain,
+  Target
 } from 'lucide-react';
-
-interface QuizQuestion {
-  id: string;
-  question: string;
-  options: string[];
-  correctAnswer: number;
-}
 
 function CoursePlayerContent() {
   const { id } = useParams<{ id: string }>();
@@ -44,38 +34,133 @@ function CoursePlayerContent() {
   const [currentContentIndex, setCurrentContentIndex] = useState(0);
   const [completedContent, setCompletedContent] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
-  const [quizAnswers, setQuizAnswers] = useState<{ [key: string]: number | string }>({});
-  const [selectedLanguage, setSelectedLanguage] = useState<'hindi' | 'tamil' | 'telugu' | 'none'>('none');
-  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
-  const [showVideoControls, setShowVideoControls] = useState(true);
   const [courseCompleted, setCourseCompleted] = useState(false);
+  const [contentProgress, setContentProgress] = useState<{ [contentId: string]: number }>({});
+  const [showActivity, setShowActivity] = useState(false);
+  const [activityCompleted, setActivityCompleted] = useState(false);
 
-  // Mock quiz data
-  const mockQuiz: QuizQuestion[] = [
-    {
-      id: '1',
-      question: 'What is the primary purpose of this learning platform?',
-      options: [
-        'Entertainment',
-        'Skill development and education',
-        'Social networking',
-        'E-commerce'
-      ],
-      correctAnswer: 1
-    },
-    {
-      id: '2',
-      question: 'Which feature helps track your learning progress?',
-      options: [
-        'Chat system',
-        'Dashboard analytics',
-        'Shopping cart',
-        'Photo gallery'
-      ],
-      correctAnswer: 1
-    }
-  ];
+  // Mock sample content with scroll-based learning data
+  const mockScrollContent = {
+    learningObjectives: JSON.stringify([
+      { id: '1', text: 'Understand the fundamentals of modern learning design', completed: false },
+      { id: '2', text: 'Learn how to create engaging educational content', completed: false },
+      { id: '3', text: 'Master the principles of progressive disclosure', completed: false },
+      { id: '4', text: 'Apply activity-based learning techniques', completed: false }
+    ]),
+    keyTakeaways: JSON.stringify([
+      { id: '1', text: 'Scroll-based learning improves retention and engagement', icon: 'brain' },
+      { id: '2', text: 'Interactive elements enhance the learning experience', icon: 'activity' },
+      { id: '3', text: 'Progressive disclosure prevents cognitive overload', icon: 'target' },
+      { id: '4', text: 'Activity-based learning reinforces key concepts', icon: 'lightbulb' }
+    ]),
+    interactiveElements: JSON.stringify([
+      {
+        id: '1',
+        type: 'highlight',
+        title: 'Key Insight',
+        content: 'Modern learners prefer self-paced, interactive content over traditional video lectures.',
+        position: 25
+      },
+      {
+        id: '2',
+        type: 'definition',
+        title: 'Progressive Disclosure',
+        content: 'A design technique that presents information in carefully sequenced steps to avoid overwhelming the learner.',
+        position: 50
+      },
+      {
+        id: '3',
+        type: 'tip',
+        title: 'Best Practice',
+        content: 'Include interactive elements every 2-3 paragraphs to maintain engagement and reinforce learning.',
+        position: 75
+      }
+    ]),
+    moduleContent: `
+      <div class="space-y-6">
+        <p>Welcome to the future of online learning. This module demonstrates how scroll-based learning can create more engaging and effective educational experiences compared to traditional video lectures.</p>
+        
+        <h3 class="text-xl font-semibold text-primary mb-3">Why Scroll-Based Learning Works</h3>
+        <p>Research in cognitive psychology shows that learners retain information better when they can control the pace of content consumption. Unlike video lectures where the pace is predetermined, scroll-based learning allows each learner to spend more time on challenging concepts and move quickly through familiar material.</p>
+        
+        <h3 class="text-xl font-semibold text-primary mb-3">The Power of Progressive Disclosure</h3>
+        <p>Progressive disclosure is a technique borrowed from user experience design that presents information in digestible chunks. This approach prevents cognitive overload and helps learners build understanding incrementally.</p>
+        
+        <p>In traditional e-learning, students often feel overwhelmed by dense video content or lengthy text blocks. Scroll-based learning breaks this pattern by revealing information as the learner progresses, creating a natural rhythm that matches human attention spans.</p>
+        
+        <h3 class="text-xl font-semibold text-primary mb-3">Interactive Elements Enhance Engagement</h3>
+        <p>Static content, whether video or text, can lead to passive consumption. By embedding interactive elements throughout the learning journey, we transform passive readers into active participants.</p>
+        
+        <p>These elements can include definitions, examples, tips, and callouts that provide additional context without disrupting the main narrative flow. They serve as mental checkpoints that help consolidate learning.</p>
+        
+        <h3 class="text-xl font-semibold text-primary mb-3">Activity-Based Learning Integration</h3>
+        <p>The most effective learning happens when theory meets practice. Scroll-based modules naturally lead into hands-on activities that allow learners to apply what they've just absorbed.</p>
+        
+        <p>This immediate application reinforces learning and helps identify areas where additional review might be needed. It's a more natural flow than the traditional "watch video, then take quiz" approach.</p>
+        
+        <h3 class="text-xl font-semibold text-primary mb-3">Measuring Success</h3>
+        <p>Scroll-based learning provides rich analytics about learner behavior. We can track not just completion, but engagement patterns, time spent on different sections, and interaction with various elements.</p>
+        
+        <p>This data helps instructors understand which concepts are challenging and which explanations are most effective, leading to continuous improvement of the learning experience.</p>
+      </div>
+    `
+  };
+
+  // Mock activity data
+  const mockActivity: Activity = {
+    id: 'activity-1',
+    type: 'quiz',
+    title: 'Knowledge Check: Scroll-Based Learning',
+    instructions: 'Test your understanding of the concepts covered in this module.',
+    timeLimit: 10,
+    points: 100,
+    questions: [
+      {
+        id: 'q1',
+        question: 'What is the main advantage of scroll-based learning over video lectures?',
+        type: 'multiple-choice',
+        options: [
+          'It requires less bandwidth',
+          'Learners can control the pace of content consumption',
+          'It\'s easier to create',
+          'It works better on mobile devices'
+        ],
+        correctAnswer: 1,
+        explanation: 'Scroll-based learning allows learners to spend more time on challenging concepts and move quickly through familiar material.',
+        points: 25
+      },
+      {
+        id: 'q2',
+        question: 'Progressive disclosure helps prevent cognitive overload.',
+        type: 'true-false',
+        correctAnswer: 0, // 0 for true, 1 for false in true-false questions
+        explanation: 'Progressive disclosure presents information in digestible chunks, preventing learners from feeling overwhelmed.',
+        points: 25
+      },
+      {
+        id: 'q3',
+        question: 'What is progressive disclosure?',
+        type: 'short-answer',
+        correctAnswer: 'technique that presents information in sequenced steps',
+        explanation: 'Progressive disclosure is a design technique that presents information in carefully sequenced steps to avoid overwhelming the learner.',
+        points: 25
+      },
+      {
+        id: 'q4',
+        question: 'Which of the following is NOT mentioned as a benefit of interactive elements?',
+        type: 'multiple-choice',
+        options: [
+          'They transform passive readers into active participants',
+          'They serve as mental checkpoints',
+          'They reduce the need for instructors',
+          'They provide additional context'
+        ],
+        correctAnswer: 2,
+        explanation: 'Interactive elements enhance learning but don\'t replace the need for instructors.',
+        points: 25
+      }
+    ]
+  };
 
   useEffect(() => {
     if (id) {
@@ -107,6 +192,8 @@ function CoursePlayerContent() {
     }
     if (currentContentIndex < courseContent.length - 1) {
       setCurrentContentIndex(currentContentIndex + 1);
+      setShowActivity(false);
+      setActivityCompleted(false);
     } else {
       // Course completed
       setCourseCompleted(true);
@@ -116,38 +203,194 @@ function CoursePlayerContent() {
   const handlePrevious = () => {
     if (currentContentIndex > 0) {
       setCurrentContentIndex(currentContentIndex - 1);
+      setShowActivity(false);
+      setActivityCompleted(false);
     }
   };
 
-  const handleQuizAnswer = (questionId: string | number, answer: number | string) => {
-    setQuizAnswers(prev => ({ ...prev, [questionId]: answer }));
+  const handleContentProgress = (contentId: string, progress: number) => {
+    setContentProgress(prev => ({ ...prev, [contentId]: progress }));
   };
 
-  const getCaptionUrl = (content: CourseContent) => {
-    switch (selectedLanguage) {
-      case 'hindi':
-        return content.captionsHindi;
-      case 'tamil':
-        return content.captionsTamil;
-      case 'telugu':
-        return content.captionsTelugu;
+  const handleContentComplete = () => {
+    if (currentContent) {
+      setCompletedContent(prev => new Set(prev).add(currentContent._id));
+      
+      // Show activity if content has activity data
+      if (currentContent.activityType && currentContent.activityData) {
+        setShowActivity(true);
+      }
+    }
+  };
+
+  const handleActivityComplete = (score: number, responses: any) => {
+    setActivityCompleted(true);
+    console.log('Activity completed with score:', score, 'responses:', responses);
+    
+    // Auto-advance after activity completion
+    setTimeout(() => {
+      handleNext();
+    }, 2000);
+  };
+
+  const renderContent = () => {
+    if (!currentContent) return null;
+
+    const contentType = currentContent.contentType?.toLowerCase();
+
+    // All content is now scroll-based learning modules
+    if (contentType === 'module' || contentType === 'scroll' || contentType === 'text' || !contentType || contentType === 'video') {
+      // Enhance content with mock data for demonstration if no real data exists
+      const enhancedContent = {
+        ...currentContent,
+        learningObjectives: currentContent.learningObjectives || JSON.stringify([
+          { id: '1', text: 'Understand the fundamentals of this topic', completed: false },
+          { id: '2', text: 'Learn practical applications and use cases', completed: false },
+          { id: '3', text: 'Master key concepts and terminology', completed: false },
+          { id: '4', text: 'Apply knowledge through hands-on activities', completed: false }
+        ]),
+        keyTakeaways: currentContent.keyTakeaways || JSON.stringify([
+          { id: '1', text: 'Interactive learning improves retention and engagement', icon: 'brain' },
+          { id: '2', text: 'Scroll-based modules allow self-paced learning', icon: 'activity' },
+          { id: '3', text: 'Progressive disclosure prevents cognitive overload', icon: 'target' },
+          { id: '4', text: 'Activity-based learning reinforces key concepts', icon: 'lightbulb' }
+        ]),
+        interactiveElements: currentContent.interactiveElements || JSON.stringify([
+          {
+            id: '1',
+            type: 'highlight',
+            title: 'Key Insight',
+            content: 'Modern learners prefer self-paced, interactive content over traditional video lectures.',
+            position: 25
+          },
+          {
+            id: '2',
+            type: 'definition',
+            title: 'Progressive Disclosure',
+            content: 'A design technique that presents information in carefully sequenced steps to avoid overwhelming the learner.',
+            position: 50
+          },
+          {
+            id: '3',
+            type: 'tip',
+            title: 'Best Practice',
+            content: 'Include interactive elements every 2-3 paragraphs to maintain engagement and reinforce learning.',
+            position: 75
+          }
+        ]),
+        moduleContent: currentContent.moduleContent || `
+          <div class="space-y-6">
+            <p>Welcome to this comprehensive learning module. This interactive experience demonstrates how scroll-based learning creates more engaging and effective educational experiences.</p>
+            
+            <h3 class="text-xl font-semibold text-primary mb-3">Why Scroll-Based Learning Works</h3>
+            <p>Research in cognitive psychology shows that learners retain information better when they can control the pace of content consumption. This approach allows each learner to spend more time on challenging concepts and move quickly through familiar material.</p>
+            
+            <h3 class="text-xl font-semibold text-primary mb-3">The Power of Progressive Disclosure</h3>
+            <p>Progressive disclosure is a technique borrowed from user experience design that presents information in digestible chunks. This approach prevents cognitive overload and helps learners build understanding incrementally.</p>
+            
+            <p>In traditional e-learning, students often feel overwhelmed by dense content. Scroll-based learning breaks this pattern by revealing information as the learner progresses, creating a natural rhythm that matches human attention spans.</p>
+            
+            <h3 class="text-xl font-semibold text-primary mb-3">Interactive Elements Enhance Engagement</h3>
+            <p>Static content can lead to passive consumption. By embedding interactive elements throughout the learning journey, we transform passive readers into active participants.</p>
+            
+            <p>These elements include definitions, examples, tips, and callouts that provide additional context without disrupting the main narrative flow. They serve as mental checkpoints that help consolidate learning.</p>
+            
+            <h3 class="text-xl font-semibold text-primary mb-3">Activity-Based Learning Integration</h3>
+            <p>The most effective learning happens when theory meets practice. Scroll-based modules naturally lead into hands-on activities that allow learners to apply what they've just absorbed.</p>
+            
+            <p>This immediate application reinforces learning and helps identify areas where additional review might be needed. It's a more natural flow than traditional approaches.</p>
+            
+            <h3 class="text-xl font-semibold text-primary mb-3">Measuring Success</h3>
+            <p>Scroll-based learning provides rich analytics about learner behavior. We can track not just completion, but engagement patterns, time spent on different sections, and interaction with various elements.</p>
+            
+            <p>This data helps instructors understand which concepts are challenging and which explanations are most effective, leading to continuous improvement of the learning experience.</p>
+          </div>
+        `
+      };
+
+      return (
+        <div className="space-y-8">
+          <ScrollLearningModule
+            content={enhancedContent}
+            onComplete={handleContentComplete}
+            onProgress={(progress) => handleContentProgress(currentContent._id, progress)}
+          />
+          
+          {/* Activity Section */}
+          {showActivity && (
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              className="mt-12"
+            >
+              <div className="mb-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <ActivityIcon className="w-6 h-6 text-primary" />
+                  <h2 className="text-2xl font-bold font-heading text-white">
+                    Interactive Activity
+                  </h2>
+                </div>
+                <p className="font-paragraph text-gray-400">
+                  Apply what you've learned in this hands-on activity.
+                </p>
+              </div>
+              
+              <ActivityComponent
+                activity={mockActivity}
+                onComplete={handleActivityComplete}
+                onProgress={(progress) => console.log('Activity progress:', progress)}
+              />
+            </motion.div>
+          )}
+        </div>
+      );
+    }
+
+    // Fallback for any other content types (convert to scroll-based)
+    return (
+      <div className="space-y-8">
+        <ScrollLearningModule
+          content={{
+            ...currentContent,
+            learningObjectives: JSON.stringify([
+              { id: '1', text: 'Understand the key concepts presented in this module', completed: false },
+              { id: '2', text: 'Apply the knowledge through practical exercises', completed: false }
+            ]),
+            keyTakeaways: JSON.stringify([
+              { id: '1', text: 'This content has been converted to an interactive format', icon: 'brain' },
+              { id: '2', text: 'Scroll-based learning improves comprehension', icon: 'activity' }
+            ]),
+            moduleContent: `
+              <div class="space-y-6">
+                <p>This content has been enhanced with our scroll-based learning format for better engagement and retention.</p>
+                ${currentContent.textContent ? `<div>${currentContent.textContent}</div>` : ''}
+                ${currentContent.description ? `<p>${currentContent.description}</p>` : ''}
+              </div>
+            `
+          }}
+          onComplete={handleContentComplete}
+          onProgress={(progress) => handleContentProgress(currentContent._id, progress)}
+        />
+      </div>
+    );
+  };
+
+  const getContentIcon = (type: string) => {
+    switch (type?.toLowerCase()) {
+      case 'module':
+      case 'scroll':
+      case 'text':
+      case 'video': // Convert video to module icon
+        return BookOpen;
+      case 'activity':
+        return ActivityIcon;
+      case 'assessment':
+      case 'quiz':
+        return Brain;
       default:
-        return null;
+        return BookOpen; // Default to module icon
     }
-  };
-
-  const downloadNotes = (content: CourseContent) => {
-    if (content.downloadableNotes) {
-      window.open(content.downloadableNotes, '_blank');
-    }
-  };
-
-  const toggleVideoPlay = () => {
-    setIsVideoPlaying(!isVideoPlaying);
-  };
-
-  const toggleMute = () => {
-    setIsMuted(!isMuted);
   };
 
   // Certificate Download Component
@@ -182,280 +425,6 @@ function CoursePlayerContent() {
       </div>
     );
   }
-
-  const renderContent = () => {
-    if (!currentContent) return null;
-
-    const contentType = currentContent.contentType?.toLowerCase();
-
-    switch (contentType) {
-      case 'video':
-        return (
-          <div className="space-y-4">
-            {/* Video Player */}
-            <div className="relative bg-black rounded-lg aspect-video overflow-hidden group">
-              {currentContent.videoLectureUrl ? (
-                <div className="relative w-full h-full">
-                  <video
-                    className="w-full h-full object-cover"
-                    controls={showVideoControls}
-                    poster={currentContent.thumbnailImage}
-                    onPlay={() => setIsVideoPlaying(true)}
-                    onPause={() => setIsVideoPlaying(false)}
-                  >
-                    <source src={currentContent.videoLectureUrl} type="video/mp4" />
-                    {getCaptionUrl(currentContent) && (
-                      <track
-                        kind="subtitles"
-                        src={getCaptionUrl(currentContent)!}
-                        srcLang={selectedLanguage}
-                        label={selectedLanguage.charAt(0).toUpperCase() + selectedLanguage.slice(1)}
-                        default={selectedLanguage !== 'none'}
-                      />
-                    )}
-                    Your browser does not support the video tag.
-                  </video>
-                  
-                  {/* Custom Video Controls Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <div className="absolute bottom-4 left-4 right-4 flex items-center gap-4">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={toggleVideoPlay}
-                        className="text-white hover:bg-white/20"
-                      >
-                        {isVideoPlaying ? <VolumeX className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-                      </Button>
-                      
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={toggleMute}
-                        className="text-white hover:bg-white/20"
-                      >
-                        {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-                      </Button>
-                      
-                      <div className="flex-1" />
-                      
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="text-white hover:bg-white/20"
-                      >
-                        <Settings className="w-4 h-4" />
-                      </Button>
-                      
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="text-white hover:bg-white/20"
-                      >
-                        <Maximize className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex items-center justify-center h-full">
-                  <div className="text-center">
-                    <Play className="w-16 h-16 text-primary mx-auto mb-4" />
-                    <p className="text-white font-paragraph">Video Player</p>
-                    <p className="text-gray-400 text-sm mt-2">
-                      {currentContent.title}
-                    </p>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Video Controls */}
-            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between p-4 bg-surface/50 rounded-lg">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <Subtitles className="w-4 h-4 text-primary" />
-                  <span className="text-sm font-paragraph text-gray-300">Captions:</span>
-                </div>
-                <Select value={selectedLanguage} onValueChange={(value: 'hindi' | 'tamil' | 'telugu' | 'none') => setSelectedLanguage(value)}>
-                  <SelectTrigger className="w-32 bg-background/50 border-white/20 text-white">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">None</SelectItem>
-                    {currentContent.captionsHindi && <SelectItem value="hindi">Hindi</SelectItem>}
-                    {currentContent.captionsTamil && <SelectItem value="tamil">Tamil</SelectItem>}
-                    {currentContent.captionsTelugu && <SelectItem value="telugu">Telugu</SelectItem>}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              {currentContent.downloadableNotes && (
-                <Button
-                  onClick={() => downloadNotes(currentContent)}
-                  variant="outline"
-                  size="sm"
-                  className="border-primary/30 text-primary hover:bg-primary/10"
-                >
-                  <Download className="w-4 h-4 mr-2" />
-                  Download Notes
-                </Button>
-              )}
-            </div>
-
-            {/* Video Description */}
-            {currentContent.description && (
-              <Card className="bg-surface/50 border-white/10">
-                <CardContent className="p-4">
-                  <h4 className="font-heading text-white font-medium mb-2">About this lecture</h4>
-                  <p className="font-paragraph text-gray-300 text-sm leading-relaxed">
-                    {currentContent.description}
-                  </p>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        );
-
-      case 'assessment':
-      case 'quiz':
-        const assessmentData = currentContent.assessmentQuestions ? JSON.parse(currentContent.assessmentQuestions) : null;
-        const scoringData = currentContent.scoringSystem ? JSON.parse(currentContent.scoringSystem) : null;
-        const questions = assessmentData?.questions || mockQuiz;
-        
-        return (
-          <div className="space-y-6">
-            <div className="bg-surface/50 border border-white/10 rounded-lg p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-2xl font-heading text-white">Major Assessment</h3>
-                <div className="flex items-center gap-4 text-sm font-paragraph text-gray-400">
-                  {scoringData?.totalPoints && (
-                    <span>Total Points: {scoringData.totalPoints}</span>
-                  )}
-                  {currentContent.timeLimitMinutes && (
-                    <span>Time Limit: {currentContent.timeLimitMinutes} minutes</span>
-                  )}
-                </div>
-              </div>
-              
-              {scoringData?.passingScore && (
-                <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 mb-6">
-                  <p className="text-primary font-paragraph text-sm">
-                    <strong>Passing Score:</strong> {scoringData.passingScore}/{scoringData.totalPoints} points ({Math.round((scoringData.passingScore / scoringData.totalPoints) * 100)}%)
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {questions.map((question: any, index: number) => (
-              <Card key={question.id || index} className="bg-surface/50 border-white/10">
-                <CardContent className="p-6">
-                  <h4 className="font-heading text-white mb-4">
-                    Question {index + 1}: {question.question}
-                  </h4>
-                  
-                  {question.type === 'essay' ? (
-                    <div className="space-y-3">
-                      <textarea
-                        className="w-full h-32 p-3 bg-background/50 border border-white/20 rounded-lg text-white placeholder:text-gray-500 resize-vertical"
-                        placeholder="Type your answer here..."
-                        value={quizAnswers[question.id || index] || ''}
-                        onChange={(e) => handleQuizAnswer(question.id || index, e.target.value)}
-                      />
-                      {question.points && (
-                        <p className="text-sm font-paragraph text-gray-400">
-                          Points: {question.points}
-                        </p>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      {question.options?.map((option: string, optionIndex: number) => (
-                        <button
-                          key={optionIndex}
-                          onClick={() => handleQuizAnswer(question.id || index, optionIndex)}
-                          className={`w-full text-left p-3 rounded-lg border transition-all ${
-                            quizAnswers[question.id || index] === optionIndex
-                              ? 'border-primary bg-primary/10 text-primary'
-                              : 'border-white/20 text-gray-300 hover:border-white/40'
-                          }`}
-                        >
-                          {String.fromCharCode(65 + optionIndex)}. {option}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
-
-            <Card className="bg-surface/50 border-white/10">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="font-heading text-white mb-2">Assessment Progress</h4>
-                    <p className="text-sm font-paragraph text-gray-400">
-                      {Object.keys(quizAnswers).length} of {questions.length} questions answered
-                    </p>
-                    {currentContent.timeLimitMinutes && (
-                      <p className="text-xs font-paragraph text-gray-500 mt-1">
-                        Time remaining: {currentContent.timeLimitMinutes} minutes
-                      </p>
-                    )}
-                  </div>
-                  <Button 
-                    className="bg-primary text-primary-foreground hover:bg-primary/90"
-                    disabled={Object.keys(quizAnswers).length < questions.length}
-                  >
-                    Submit Assessment
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        );
-
-      default:
-        return (
-          <div className="prose prose-invert max-w-none">
-            <h3 className="text-xl font-heading text-white mb-4">
-              {currentContent.title}
-            </h3>
-            <div className="font-paragraph text-gray-300 leading-relaxed">
-              {currentContent.textContent || currentContent.description || (
-                <div>
-                  <p className="mb-4">
-                    Welcome to this comprehensive learning module. In this section, you'll discover 
-                    key concepts and practical applications that will enhance your understanding 
-                    of the subject matter.
-                  </p>
-                  <p className="mb-4">
-                    Our interactive approach ensures that you not only learn the theory but also 
-                    gain hands-on experience through practical exercises and real-world examples.
-                  </p>
-                  <p>
-                    Take your time to absorb the information, and don't hesitate to revisit 
-                    previous sections if you need to reinforce your understanding.
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-        );
-    }
-  };
-
-  const getContentIcon = (type: string) => {
-    switch (type?.toLowerCase()) {
-      case 'video':
-        return Play;
-      case 'assessment':
-      case 'quiz':
-        return HelpCircle;
-      default:
-        return FileText;
-    }
-  };
 
   if (loading) {
     return (
@@ -499,7 +468,7 @@ function CoursePlayerContent() {
                 {course.titleEn}
               </h1>
               <p className="text-sm font-paragraph text-gray-400">
-                {currentContentIndex + 1} of {courseContent.length} lessons
+                {currentContentIndex + 1} of {courseContent.length} modules
               </p>
             </div>
           </div>
@@ -517,7 +486,7 @@ function CoursePlayerContent() {
         {/* Sidebar */}
         <div className="w-80 bg-surface/30 border-r border-white/10 h-[calc(100vh-73px)] overflow-y-auto">
           <div className="p-6">
-            <h2 className="font-heading text-white font-semibold mb-4">Course Content</h2>
+            <h2 className="font-heading text-white font-semibold mb-4">Course Modules</h2>
             <div className="space-y-2">
               {courseContent.map((content, index) => {
                 const IconComponent = getContentIcon(content.contentType || '');
@@ -527,7 +496,11 @@ function CoursePlayerContent() {
                 return (
                   <button
                     key={content._id}
-                    onClick={() => setCurrentContentIndex(index)}
+                    onClick={() => {
+                      setCurrentContentIndex(index);
+                      setShowActivity(false);
+                      setActivityCompleted(false);
+                    }}
                     className={`w-full text-left p-3 rounded-lg border transition-all ${
                       isCurrent
                         ? 'border-primary bg-primary/10 text-primary'
@@ -544,12 +517,25 @@ function CoursePlayerContent() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="font-paragraph text-sm font-medium truncate">
-                          {content.title || `Lesson ${index + 1}`}
+                          {content.title || `Module ${index + 1}`}
                         </div>
-                        {content.estimatedDurationMinutes && (
-                          <div className="flex items-center gap-1 text-xs text-gray-500 mt-1">
-                            <Clock className="w-3 h-3" />
-                            <span>{content.estimatedDurationMinutes}min</span>
+                        <div className="flex items-center gap-2 mt-1">
+                          {content.estimatedDurationMinutes && (
+                            <div className="flex items-center gap-1 text-xs text-gray-500">
+                              <Clock className="w-3 h-3" />
+                              <span>{content.estimatedDurationMinutes}min</span>
+                            </div>
+                          )}
+                          {content.activityType && (
+                            <div className="flex items-center gap-1 text-xs text-primary">
+                              <ActivityIcon className="w-3 h-3" />
+                              <span>Activity</span>
+                            </div>
+                          )}
+                        </div>
+                        {contentProgress[content._id] && (
+                          <div className="mt-2">
+                            <Progress value={contentProgress[content._id]} className="h-1" />
                           </div>
                         )}
                       </div>
@@ -588,10 +574,12 @@ function CoursePlayerContent() {
 
               <div className="text-center">
                 <div className="text-sm font-paragraph text-gray-400 mb-1">
-                  Lesson {currentContentIndex + 1} of {courseContent.length}
+                  Module {currentContentIndex + 1} of {courseContent.length}
                 </div>
                 <div className="text-xs font-paragraph text-gray-500">
                   {currentContent?.estimatedDurationMinutes && `${currentContent.estimatedDurationMinutes} minutes`}
+                  {showActivity && !activityCompleted && ' • Activity in progress'}
+                  {activityCompleted && ' • Activity completed'}
                 </div>
               </div>
 
@@ -613,18 +601,20 @@ function CoursePlayerContent() {
                 ) : (
                   <Button
                     onClick={handleNext}
+                    disabled={showActivity && !activityCompleted}
                     className="bg-primary text-primary-foreground hover:bg-primary/90"
                   >
-                    Complete Course
+                    {showActivity && !activityCompleted ? 'Complete Activity First' : 'Complete Course'}
                     <CheckCircle className="w-4 h-4 ml-2" />
                   </Button>
                 )
               ) : (
                 <Button
                   onClick={handleNext}
+                  disabled={showActivity && !activityCompleted}
                   className="bg-primary text-primary-foreground hover:bg-primary/90"
                 >
-                  Next
+                  {showActivity && !activityCompleted ? 'Complete Activity First' : 'Next Module'}
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
               )}
