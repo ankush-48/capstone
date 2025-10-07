@@ -14,13 +14,16 @@ import {
   Activity,
   Brain,
   Users,
-  Zap
+  Zap,
+  Download
 } from 'lucide-react';
+import { PDFNotesGenerator } from '@/components/ui/pdf-notes-generator';
 
 interface ScrollLearningModuleProps {
   content: CourseContent;
   onComplete: () => void;
   onProgress: (progress: number) => void;
+  courseName?: string;
 }
 
 interface InteractiveElement {
@@ -43,7 +46,7 @@ interface KeyTakeaway {
   icon: string;
 }
 
-export function ScrollLearningModule({ content, onComplete, onProgress }: ScrollLearningModuleProps) {
+export function ScrollLearningModule({ content, onComplete, onProgress, courseName }: ScrollLearningModuleProps) {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [completedObjectives, setCompletedObjectives] = useState<Set<string>>(new Set());
   const [showActivity, setShowActivity] = useState(false);
@@ -262,13 +265,24 @@ export function ScrollLearningModule({ content, onComplete, onProgress }: Scroll
             {content.description}
           </p>
           
-          {/* Estimated Duration */}
-          {content.estimatedDurationMinutes && (
-            <div className="flex items-center gap-2 text-sm font-paragraph text-gray-500">
-              <BookOpen className="w-4 h-4" />
-              <span>Estimated reading time: {content.estimatedDurationMinutes} minutes</span>
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-4">
+              {/* Estimated Duration */}
+              {content.estimatedDurationMinutes && (
+                <div className="flex items-center gap-2 text-sm font-paragraph text-gray-500">
+                  <BookOpen className="w-4 h-4" />
+                  <span>Estimated reading time: {content.estimatedDurationMinutes} minutes</span>
+                </div>
+              )}
             </div>
-          )}
+            
+            {/* Download Notes Button */}
+            <PDFNotesGenerator 
+              content={content} 
+              courseName={courseName}
+              onDownload={() => console.log('Notes downloaded for:', content.title)}
+            />
+          </div>
         </motion.div>
 
         {/* Learning Objectives (Mobile) */}

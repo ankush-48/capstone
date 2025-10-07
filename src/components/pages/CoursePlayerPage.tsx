@@ -314,6 +314,7 @@ function CoursePlayerContent() {
             content={enhancedContent}
             onComplete={handleContentComplete}
             onProgress={(progress) => handleContentProgress(currentContent._id, progress)}
+            courseName={course?.titleEn}
           />
           
           {/* Activity Section */}
@@ -371,6 +372,7 @@ function CoursePlayerContent() {
           }}
           onComplete={handleContentComplete}
           onProgress={(progress) => handleContentProgress(currentContent._id, progress)}
+          courseName={course?.titleEn}
         />
       </div>
     );

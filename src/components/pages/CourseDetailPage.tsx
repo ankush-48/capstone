@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { MemberProtectedRoute } from '@/components/ui/member-protected-route';
+import { PDFNotesGenerator } from '@/components/ui/pdf-notes-generator';
 import { 
   Clock, 
   User, 
@@ -219,52 +220,65 @@ function CourseDetailContent() {
                     return (
                       <Card key={content._id} className="bg-surface/50 border-white/10 backdrop-blur-sm">
                         <CardContent className="p-4">
-                          <div className="flex items-center gap-3">
+                           <div className="flex items-center gap-3">
                             <div className="flex-shrink-0 w-8 h-8 bg-primary/20 rounded-lg flex items-center justify-center">
                               <IconComponent className="w-4 h-4 text-primary" />
                             </div>
                             <div className="flex-1">
-                              <h3 className="font-heading text-white font-medium">
-                                {content.title || `Module ${index + 1}`}
-                              </h3>
-                              {content.description && (
-                                <p className="text-sm font-paragraph text-gray-400 mt-1">
-                                  {content.description}
-                                </p>
-                              )}
-                              
-                              {/* Content Features */}
-                              <div className="flex items-center gap-2 mt-2">
-                                <span className="inline-flex items-center gap-1 text-xs font-paragraph text-primary">
-                                  <BookOpen className="w-3 h-3" />
-                                  Interactive Module
-                                </span>
-                                {hasInteractiveElements && (
-                                  <span className="inline-flex items-center gap-1 text-xs font-paragraph text-purple-400">
-                                    <FileText className="w-3 h-3" />
-                                    Interactive Elements
-                                  </span>
-                                )}
-                                {hasActivity && (
-                                  <span className="inline-flex items-center gap-1 text-xs font-paragraph text-green-400">
-                                    <CheckCircle className="w-3 h-3" />
-                                    Activity
-                                  </span>
-                                )}
-                                {hasNotes && (
-                                  <span className="inline-flex items-center gap-1 text-xs font-paragraph text-orange-400">
-                                    <Download className="w-3 h-3" />
-                                    Notes
-                                  </span>
-                                )}
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  <h3 className="font-heading text-white font-medium">
+                                    {content.title || `Module ${index + 1}`}
+                                  </h3>
+                                  {content.description && (
+                                    <p className="text-sm font-paragraph text-gray-400 mt-1">
+                                      {content.description}
+                                    </p>
+                                  )}
+                                  
+                                  {/* Content Features */}
+                                  <div className="flex items-center gap-2 mt-2">
+                                    <span className="inline-flex items-center gap-1 text-xs font-paragraph text-primary">
+                                      <BookOpen className="w-3 h-3" />
+                                      Interactive Module
+                                    </span>
+                                    {hasInteractiveElements && (
+                                      <span className="inline-flex items-center gap-1 text-xs font-paragraph text-purple-400">
+                                        <FileText className="w-3 h-3" />
+                                        Interactive Elements
+                                      </span>
+                                    )}
+                                    {hasActivity && (
+                                      <span className="inline-flex items-center gap-1 text-xs font-paragraph text-green-400">
+                                        <CheckCircle className="w-3 h-3" />
+                                        Activity
+                                      </span>
+                                    )}
+                                    {hasNotes && (
+                                      <span className="inline-flex items-center gap-1 text-xs font-paragraph text-orange-400">
+                                        <Download className="w-3 h-3" />
+                                        Notes
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                                
+                                {/* Download Notes Button for Each Module */}
+                                <div className="ml-4 flex items-center gap-2">
+                                  {content.estimatedDurationMinutes && (
+                                    <div className="flex items-center gap-1 text-xs font-paragraph text-gray-500">
+                                      <Clock className="w-3 h-3" />
+                                      <span>{content.estimatedDurationMinutes}min</span>
+                                    </div>
+                                  )}
+                                  <PDFNotesGenerator
+                                    content={content}
+                                    courseName={course?.titleEn}
+                                    onDownload={() => console.log('Module notes downloaded for:', content.title)}
+                                  />
+                                </div>
                               </div>
                             </div>
-                            {content.estimatedDurationMinutes && (
-                              <div className="flex items-center gap-1 text-xs font-paragraph text-gray-500">
-                                <Clock className="w-3 h-3" />
-                                <span>{content.estimatedDurationMinutes}min</span>
-                              </div>
-                            )}
                           </div>
                         </CardContent>
                       </Card>
