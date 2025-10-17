@@ -46,8 +46,4 @@ export interface CourseContent {
   thumbnailImage?: string;
   /** @wixFieldType number */
   estimatedDurationMinutes?: number;
-  /** @wixFieldType text */
-  activityType?: string;
-  /** @wixFieldType text */
-  moduleContent?: string;
 }
