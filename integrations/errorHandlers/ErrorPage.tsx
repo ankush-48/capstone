@@ -1,12 +1,12 @@
 import { useRouteError } from "react-router";
 import { useEffect } from "react";
-import { ErrorOverlay, sendErrorToParent } from "../../vite-error-overlay-plugin";
+import { ErrorOverlay } from "../../vite-error-overlay-plugin";
 
 export default function ErrorPage() {
   const error = useRouteError() as Error;
 
   useEffect(() => {
-    sendErrorToParent(error);
+    ErrorOverlay.sendErrorToParent(error);
   }, [error]);
 
   return (

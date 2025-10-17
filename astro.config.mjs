@@ -29,7 +29,7 @@ export default defineConfig({
                 const url = version === 'local' ? localUrl : cdnUrl;
                 const framewireModule = await import(url);
                 globalThis.framewire = framewireModule;
-                framewireModule.init();
+                framewireModule.init({}, import.meta.hot);
                 console.log('Framewire initialized');
               }`
             );

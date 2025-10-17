@@ -1,22 +1,3 @@
-export const sendErrorToParent = err => {
-  // Send error to parent using framewire
-  if (globalThis.framewire) {
-    try {
-      const { sendMessageToParent, EditorEventMessages } = globalThis.framewire;
-      sendMessageToParent({
-        type: EditorEventMessages.CLIENT_ERROR,
-        clientErrorData: {
-          errorType: 'error',
-          message: err?.message || 'Unknown error',
-          stack: err?.stack || 'No stack trace available',
-        }
-      });
-    } catch (error) {
-      console.warn('Failed to send error to parent via framewire:', error?.message);
-    }
-  }
-}
-
 export class ErrorOverlay {
   static MESSAGE_TITLE = `We're having trouble displaying this page`;
   static MESSAGE_DESCRIPTION = `Something didn't load correctly on our end.`;
@@ -118,11 +99,30 @@ export class ErrorOverlay {
     `;
   }
 
+  static sendErrorToParent(err) {
+    // Send error to parent using framewire
+    if (globalThis.framewire) {
+      try {
+        const { sendMessageToParent, EditorEventMessages } = globalThis.framewire;
+        sendMessageToParent({
+          type: EditorEventMessages.CLIENT_ERROR,
+          clientErrorData: {
+            errorType: 'error',
+            message: err?.message || 'Unknown error',
+            stack: err?.stack || 'No stack trace available',
+          }
+        });
+      } catch (error) {
+        console.warn('Failed to send error to parent via framewire:', error?.message);
+      }
+    }
+  }
+
 	constructor(err) {
 		console.log('ErrorPage-style overlay constructor called with:', err);
 
     // Call editor frame with the error (via post message)
-		this.sendErrorToParent(err);
+    ErrorOverlay.sendErrorToParent(err);
 
     // Create the overlay element using HTML template
 		const overlay = document.createElement('div');
@@ -130,10 +130,6 @@ export class ErrorOverlay {
 
 		// Add to DOM
 		document.body.appendChild(overlay);
-	}
-
-	sendErrorToParent(err) {
-		sendErrorToParent(err);
 	}
 }
 
