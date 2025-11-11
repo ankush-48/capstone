@@ -26,11 +26,23 @@ export class BaseCrudService {
 
   /**
    * Retrieves all items from the collection
+   * @param collectionId - The collection to query
+   * @param includeReferencedItems - Array of reference field names to populate
    * @returns Promise<items.WixDataResult<T>> - Query result with all items
    */
-  static async getAll<T extends WixDataItem>(collectionId: string): Promise<items.WixDataResult<T>> {
+  static async getAll<T extends WixDataItem>(
+    collectionId: string,
+    includeReferencedItems?: string[]
+  ): Promise<items.WixDataResult<T>> {
     try {
-      const result = await items.query(collectionId).find();
+      let query = items.query(collectionId);
+
+      // Use Wix's built-in include() method for referenced data
+      if (includeReferencedItems && includeReferencedItems.length > 0) {
+        query = query.include(...includeReferencedItems);
+      }
+
+      const result = await query.find();
       return result as items.WixDataResult<T>;
     } catch (error) {
       console.error(`Error fetching ${collectionId}s:`, error);
@@ -42,14 +54,25 @@ export class BaseCrudService {
 
   /**
    * Retrieves a single item by ID
+   * @param collectionId - The collection to query
    * @param itemId - ID of the item to retrieve
+   * @param includeReferencedItems - Array of reference field names to populate
    * @returns Promise<T | null> - The item or null if not found
    */
-  static async getById<T extends WixDataItem>(collectionId: string, itemId: string): Promise<T | null> {
+  static async getById<T extends WixDataItem>(
+    collectionId: string,
+    itemId: string,
+    includeReferencedItems?: string[]
+  ): Promise<T | null> {
     try {
-      const result = await items.query(collectionId)
-        .eq("_id", itemId)
-        .find();
+      let query = items.query(collectionId).eq("_id", itemId);
+
+      // Use Wix's built-in include() method for referenced data
+      if (includeReferencedItems && includeReferencedItems.length > 0) {
+        query = query.include(...includeReferencedItems);
+      }
+
+      const result = await query.find();
 
       if (result.items.length > 0) {
         return result.items[0] as T;
@@ -104,4 +127,5 @@ export class BaseCrudService {
       );
     }
   }
+
 }

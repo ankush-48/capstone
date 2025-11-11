@@ -99,7 +99,7 @@ export class ErrorOverlay {
     `;
   }
 
-  static sendErrorToParent(err) {
+  static sendErrorToParent(err, type) {
     // Send error to parent using framewire
     if (globalThis.framewire) {
       try {
@@ -107,7 +107,7 @@ export class ErrorOverlay {
         sendMessageToParent({
           type: EditorEventMessages.CLIENT_ERROR,
           clientErrorData: {
-            errorType: 'error',
+            errorType: type,
             message: err?.message || 'Unknown error',
             stack: err?.stack || 'No stack trace available',
           }
@@ -122,7 +122,7 @@ export class ErrorOverlay {
 		console.log('ErrorPage-style overlay constructor called with:', err);
 
     // Call editor frame with the error (via post message)
-    ErrorOverlay.sendErrorToParent(err);
+    ErrorOverlay.sendErrorToParent(err, 'build');
 
     // Create the overlay element using HTML template
 		const overlay = document.createElement('div');
