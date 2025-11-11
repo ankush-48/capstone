@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { BaseCrudService, useMember } from '@/integrations';
 import { Courses } from '@/entities/courses';
+import { UserProgressService } from '@/services/userProgressService';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -26,26 +27,30 @@ import { Image } from '@/components/ui/image';
 
 function DashboardContent() {
   const { member } = useMember();
-  const [enrolledCourses, setEnrolledCourses] = useState<Courses[]>([]);
+  const [enrolledCourses, setEnrolledCourses] = useState<Array<Courses & { progress: number }>>([]);
   const [completedCourses, setCompletedCourses] = useState<Courses[]>([]);
   const [courseContent, setCourseContent] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchUserCourses();
-  }, []);
+    if (member?.id) {
+      initializeAndFetchUserCourses();
+    }
+  }, [member?.id]);
 
-  const fetchUserCourses = async () => {
+  const initializeAndFetchUserCourses = async () => {
     try {
-      // Fetch all courses and simulate user enrollment
-      const { items: allCourses } = await BaseCrudService.getAll<Courses>('courses');
+      if (!member?.id) return;
+
+      // Initialize progress for new user (this will skip if user already has progress)
+      await UserProgressService.initializeUserProgress(member.id);
       
-      // Simulate enrolled courses (first 3 courses)
-      const enrolled = allCourses.slice(0, 3);
+      // Fetch user courses with progress
+      const enrolled = await UserProgressService.getEnrolledCourses(member.id);
       setEnrolledCourses(enrolled);
       
-      // Simulate completed courses (last 2 courses)
-      const completed = allCourses.slice(-2);
+      // Fetch completed courses
+      const completed = await UserProgressService.getCompletedCourses(member.id);
       setCompletedCourses(completed);
 
       // Fetch course content for notes generation
@@ -58,9 +63,13 @@ function DashboardContent() {
     }
   };
 
-  const mockProgress = [65, 30, 85]; // Mock progress for enrolled courses
-  const totalHoursLearned = 24;
+  const progressValues = enrolledCourses.map(course => course.progress);
+  const totalHoursLearned = Math.round(enrolledCourses.reduce((total, course) => {
+    const courseHours = course.durationMinutes ? course.durationMinutes / 60 : 0;
+    return total + (courseHours * (course.progress / 100));
+  }, 0));
   const certificatesEarned = completedCourses.length;
+  const averageProgress = progressValues.length > 0 ? Math.round(progressValues.reduce((a, b) => a + b, 0) / progressValues.length) : 0;
 
   if (loading) {
     return (
@@ -119,7 +128,7 @@ function DashboardContent() {
               {
                 icon: TrendingUp,
                 title: 'Average Progress',
-                value: `${Math.round(mockProgress.reduce((a, b) => a + b, 0) / mockProgress.length)}%`,
+                value: `${averageProgress}%`,
                 color: 'text-green-400'
               }
             ].map((stat, index) => (
@@ -199,9 +208,9 @@ function DashboardContent() {
                               <div className="flex-1">
                                 <div className="flex items-center justify-between text-sm font-paragraph text-gray-400 mb-1">
                                   <span>Progress</span>
-                                  <span>{mockProgress[index]}%</span>
+                                  <span>{course.progress}%</span>
                                 </div>
-                                <Progress value={mockProgress[index]} className="h-2" />
+                                <Progress value={course.progress} className="h-2" />
                               </div>
                             </div>
                             
