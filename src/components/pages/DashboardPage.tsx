@@ -33,24 +33,24 @@ function DashboardContent() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (member?.id) {
+    if (member?._id) {
       initializeAndFetchUserCourses();
     }
-  }, [member?.id]);
+  }, [member?._id]);
 
   const initializeAndFetchUserCourses = async () => {
     try {
-      if (!member?.id) return;
+      if (!member?._id) return;
 
       // Initialize progress for new user (this will skip if user already has progress)
-      await UserProgressService.initializeUserProgress(member.id);
+      await UserProgressService.initializeUserProgress(member._id);
       
       // Fetch user courses with progress
-      const enrolled = await UserProgressService.getEnrolledCourses(member.id);
+      const enrolled = await UserProgressService.getEnrolledCourses(member._id);
       setEnrolledCourses(enrolled);
       
       // Fetch completed courses
-      const completed = await UserProgressService.getCompletedCourses(member.id);
+      const completed = await UserProgressService.getCompletedCourses(member._id);
       setCompletedCourses(completed);
 
       // Fetch course content for notes generation

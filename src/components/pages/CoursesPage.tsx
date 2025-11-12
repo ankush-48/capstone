@@ -3,21 +3,26 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { BaseCrudService } from '@/integrations';
 import { Courses } from '@/entities/courses';
+import { CourseContent } from '@/entities/coursecontent';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Search, Clock, User, BookOpen } from 'lucide-react';
+import { VideoPlayer } from '@/components/ui/video-player';
+import { Search, Clock, User, BookOpen, Play, Video, AlertCircle } from 'lucide-react';
 import { Image } from '@/components/ui/image';
 
 export default function CoursesPage() {
   const [courses, setCourses] = useState<Courses[]>([]);
+  const [courseContent, setCourseContent] = useState<{ [courseId: string]: CourseContent[] }>({});
   const [filteredCourses, setFilteredCourses] = useState<Courses[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedDifficulty, setSelectedDifficulty] = useState('all');
   const [loading, setLoading] = useState(true);
+  const [videoErrors, setVideoErrors] = useState<{ [contentId: string]: boolean }>({});
+  const [expandedCourse, setExpandedCourse] = useState<string | null>(null);
 
   useEffect(() => {
     fetchCourses();
@@ -31,6 +36,24 @@ export default function CoursesPage() {
     try {
       const { items } = await BaseCrudService.getAll<Courses>('courses');
       setCourses(items);
+      
+      // Fetch course content for each course
+      const { items: allContent } = await BaseCrudService.getAll<CourseContent>('coursecontent');
+      
+      // Group content by course (assuming courseId field exists or we use a naming convention)
+      const contentByCourse: { [courseId: string]: CourseContent[] } = {};
+      
+      // For now, we'll assign content to courses based on order
+      // In a real app, you'd have a courseId field in CourseContent
+      items.forEach((course, index) => {
+        const courseContentItems = allContent.filter((content, contentIndex) => 
+          contentIndex >= index * 3 && contentIndex < (index + 1) * 3
+        ).sort((a, b) => (a.orderIndex || 0) - (b.orderIndex || 0));
+        
+        contentByCourse[course._id] = courseContentItems;
+      });
+      
+      setCourseContent(contentByCourse);
     } catch (error) {
       console.error('Error fetching courses:', error);
     } finally {
@@ -77,6 +100,23 @@ export default function CoursesPage() {
       default:
         return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
     }
+  };
+
+  const handleVideoError = (contentId: string) => {
+    setVideoErrors(prev => ({ ...prev, [contentId]: true }));
+  };
+
+  const getFirstVideoContent = (courseId: string): CourseContent | null => {
+    const content = courseContent[courseId] || [];
+    return content.find(item => item.videoLectureUrl && item.contentType?.toLowerCase() === 'video') || null;
+  };
+
+  const hasVideoContent = (courseId: string): boolean => {
+    return getFirstVideoContent(courseId) !== null;
+  };
+
+  const toggleCourseExpansion = (courseId: string) => {
+    setExpandedCourse(expandedCourse === courseId ? null : courseId);
   };
 
   if (loading) {
@@ -180,74 +220,165 @@ export default function CoursesPage() {
             </motion.div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {filteredCourses.map((course, index) => (
-                <motion.div
-                  key={course._id}
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                >
-                  <Card className="bg-surface/50 border-white/10 backdrop-blur-sm hover:bg-surface/70 transition-all duration-300 group overflow-hidden">
-                    {course.thumbnail && (
+              {filteredCourses.map((course, index) => {
+                const firstVideoContent = getFirstVideoContent(course._id);
+                const isExpanded = expandedCourse === course._id;
+                const hasVideo = hasVideoContent(course._id);
+                
+                return (
+                  <motion.div
+                    key={course._id}
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: index * 0.1 }}
+                  >
+                    <Card className="bg-surface/50 border-white/10 backdrop-blur-sm hover:bg-surface/70 transition-all duration-300 group overflow-hidden">
+                      {/* Course Thumbnail or Video Preview */}
                       <div className="relative overflow-hidden">
-                        <Image
-                          src={course.thumbnail}
-                          alt={course.titleEn || 'Course thumbnail'}
-                          width={400}
-                          className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                      </div>
-                    )}
-                    
-                    <CardHeader className="pb-3">
-                      <div className="flex items-start justify-between gap-2 mb-2">
-                        <CardTitle className="text-lg font-heading text-white line-clamp-2">
-                          {course.titleEn}
-                        </CardTitle>
-                        {course.difficultyLevel && (
-                          <Badge className={`text-xs ${getDifficultyColor(course.difficultyLevel)}`}>
-                            {course.difficultyLevel}
-                          </Badge>
+                        {isExpanded && firstVideoContent && !videoErrors[firstVideoContent._id] ? (
+                          <div className="relative">
+                            <VideoPlayer
+                              videoUrl={firstVideoContent.videoLectureUrl!}
+                              title={firstVideoContent.title}
+                              captions={{
+                                hindi: firstVideoContent.captionsHindi,
+                                tamil: firstVideoContent.captionsTamil,
+                                telugu: firstVideoContent.captionsTelugu
+                              }}
+                              onProgress={() => {}}
+                              onComplete={() => {}}
+                              className="aspect-video"
+                            />
+                            <div className="absolute top-2 right-2 z-10">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => toggleCourseExpansion(course._id)}
+                                className="bg-black/50 text-white hover:bg-black/70"
+                              >
+                                ✕
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <>
+                            {course.thumbnail ? (
+                              <Image
+                                src={course.thumbnail}
+                                alt={course.titleEn || 'Course thumbnail'}
+                                width={400}
+                                className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                              />
+                            ) : (
+                              <div className="w-full h-48 bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+                                <BookOpen className="w-16 h-16 text-white/50" />
+                              </div>
+                            )}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                            
+                            {/* Video Play Button */}
+                            {hasVideo && (
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <Button
+                                  variant="ghost"
+                                  size="lg"
+                                  onClick={() => toggleCourseExpansion(course._id)}
+                                  className="bg-black/50 hover:bg-black/70 text-white rounded-full p-4"
+                                >
+                                  <Play className="w-8 h-8 fill-white" />
+                                </Button>
+                              </div>
+                            )}
+                            
+                            {/* Video Badge */}
+                            {hasVideo && (
+                              <div className="absolute top-2 left-2">
+                                <Badge className="bg-primary/90 text-primary-foreground">
+                                  <Video className="w-3 h-3 mr-1" />
+                                  Video
+                                </Badge>
+                              </div>
+                            )}
+                          </>
                         )}
                       </div>
                       
-                      {course.category && (
-                        <Badge variant="outline" className="w-fit text-xs border-primary/30 text-primary">
-                          {course.category}
-                        </Badge>
-                      )}
-                    </CardHeader>
+                      <CardHeader className="pb-3">
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <CardTitle className="text-lg font-heading text-white line-clamp-2">
+                            {course.titleEn}
+                          </CardTitle>
+                          {course.difficultyLevel && (
+                            <Badge className={`text-xs ${getDifficultyColor(course.difficultyLevel)}`}>
+                              {course.difficultyLevel}
+                            </Badge>
+                          )}
+                        </div>
+                        
+                        {course.category && (
+                          <Badge variant="outline" className="w-fit text-xs border-primary/30 text-primary">
+                            {course.category}
+                          </Badge>
+                        )}
+                      </CardHeader>
 
-                    <CardContent className="pt-0">
-                      <p className="font-paragraph text-gray-400 text-sm mb-4 line-clamp-3">
-                        {course.descriptionEn}
-                      </p>
+                      <CardContent className="pt-0">
+                        <p className="font-paragraph text-gray-400 text-sm mb-4 line-clamp-3">
+                          {course.descriptionEn}
+                        </p>
 
-                      <div className="flex items-center gap-4 text-xs font-paragraph text-gray-500 mb-4">
-                        {course.instructorName && (
-                          <div className="flex items-center gap-1">
-                            <User className="w-3 h-3" />
-                            <span>{course.instructorName}</span>
+                        <div className="flex items-center gap-4 text-xs font-paragraph text-gray-500 mb-4">
+                          {course.instructorName && (
+                            <div className="flex items-center gap-1">
+                              <User className="w-3 h-3" />
+                              <span>{course.instructorName}</span>
+                            </div>
+                          )}
+                          {course.durationMinutes && (
+                            <div className="flex items-center gap-1">
+                              <Clock className="w-3 h-3" />
+                              <span>{Math.round(course.durationMinutes / 60)}h</span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Video Error Handling */}
+                        {isExpanded && firstVideoContent && videoErrors[firstVideoContent._id] && (
+                          <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
+                            <div className="flex items-center gap-2 text-red-400 text-sm">
+                              <AlertCircle className="w-4 h-4" />
+                              <span>Video unavailable. Please try again later.</span>
+                            </div>
                           </div>
                         )}
-                        {course.durationMinutes && (
-                          <div className="flex items-center gap-1">
-                            <Clock className="w-3 h-3" />
-                            <span>{Math.round(course.durationMinutes / 60)}h</span>
-                          </div>
-                        )}
-                      </div>
 
-                      <Button asChild className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
-                        <Link to={`/courses/${course._id}`}>
-                          View Course
-                        </Link>
-                      </Button>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
+                        <div className="flex gap-2">
+                          {hasVideo && !isExpanded && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => toggleCourseExpansion(course._id)}
+                              className="border-primary/30 text-primary hover:bg-primary/10"
+                            >
+                              <Play className="w-3 h-3 mr-1" />
+                              Preview
+                            </Button>
+                          )}
+                          
+                          <Button 
+                            asChild 
+                            className={`${hasVideo && !isExpanded ? 'flex-1' : 'w-full'} bg-primary text-primary-foreground hover:bg-primary/90`}
+                          >
+                            <Link to={`/courses/${course._id}`}>
+                              View Course
+                            </Link>
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                );
+              })}
             </div>
           )}
         </div>
