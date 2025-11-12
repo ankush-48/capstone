@@ -4,6 +4,27 @@
  */
 
 /**
+ * Collection ID: authorizedadmins
+ * Interface for AuthorizedAdmins
+ */
+export interface AuthorizedAdmins {
+  _id: string;
+  _createdDate?: Date;
+  _updatedDate?: Date;
+  /** @wixFieldType text */
+  email?: string;
+  /** @wixFieldType text */
+  adminName?: string;
+  /** @wixFieldType date */
+  authorizedDate?: Date | string;
+  /** @wixFieldType datetime */
+  lastLoginAttempt?: Date | string;
+  /** @wixFieldType boolean */
+  isActive?: boolean;
+}
+
+
+/**
  * Collection ID: coursecontent
  * Interface for CourseContent
  */
@@ -52,9 +73,9 @@ export interface CourseContent {
   /** @wixFieldType number */
   estimatedDurationMinutes?: number;
   /** @wixFieldType text */
-  moduleContent?: string;
-  /** @wixFieldType text */
   activityType?: string;
+  /** @wixFieldType text */
+  moduleContent?: string;
 }
 
 
@@ -102,7 +123,7 @@ export interface UserCourseProgress {
   /** @wixFieldType number */
   completionPercentage?: number;
   /** @wixFieldType datetime */
-  lastUpdatedDate?: Date;
+  lastUpdatedDate?: Date | string;
   /** @wixFieldType boolean */
   isCompleted?: boolean;
 }

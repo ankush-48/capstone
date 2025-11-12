@@ -12,6 +12,7 @@ import { MemberProtectedRoute } from '@/components/ui/member-protected-route';
 import { CertificateGenerator } from '@/components/ui/certificate-generator';
 import { ScrollLearningModule } from '@/components/ui/scroll-learning-module';
 import { ActivityComponent, Activity } from '@/components/ui/activity-components';
+import { VideoPlayer } from '@/components/ui/video-player';
 import { 
   ArrowLeft,
   ArrowRight,
@@ -23,7 +24,9 @@ import {
   Award,
   Activity as ActivityIcon,
   Brain,
-  Target
+  Target,
+  Play,
+  Video
 } from 'lucide-react';
 
 function CoursePlayerContent() {
@@ -238,8 +241,140 @@ function CoursePlayerContent() {
 
     const contentType = currentContent.contentType?.toLowerCase();
 
-    // All content is now scroll-based learning modules
-    if (contentType === 'module' || contentType === 'scroll' || contentType === 'text' || !contentType || contentType === 'video') {
+    // Video content with video player
+    if (contentType === 'video' && currentContent.videoLectureUrl) {
+      return (
+        <div className="space-y-8">
+          <div className="mb-6">
+            <h2 className="text-3xl font-bold font-heading text-white mb-4">
+              {currentContent.title || `Video Lecture ${currentContentIndex + 1}`}
+            </h2>
+            {currentContent.description && (
+              <p className="text-lg text-gray-300 mb-6">
+                {currentContent.description}
+              </p>
+            )}
+          </div>
+
+          <VideoPlayer
+            videoUrl={currentContent.videoLectureUrl}
+            title={currentContent.title}
+            captions={{
+              hindi: currentContent.captionsHindi,
+              tamil: currentContent.captionsTamil,
+              telugu: currentContent.captionsTelugu
+            }}
+            onProgress={(progress) => handleContentProgress(currentContent._id, progress)}
+            onComplete={handleContentComplete}
+            className="aspect-video max-w-4xl mx-auto"
+          />
+
+          {/* Learning Objectives */}
+          {currentContent.learningObjectives && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="bg-surface/30 rounded-lg p-6 border border-white/10"
+            >
+              <h3 className="text-xl font-semibold font-heading text-white mb-4 flex items-center gap-2">
+                <Target className="w-5 h-5 text-primary" />
+                Learning Objectives
+              </h3>
+              <div className="space-y-2">
+                {JSON.parse(currentContent.learningObjectives).map((objective: any, index: number) => (
+                  <div key={objective.id || index} className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-primary rounded-full flex-shrink-0"></div>
+                    <span className="text-gray-300">{objective.text}</span>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+
+          {/* Key Takeaways */}
+          {currentContent.keyTakeaways && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="bg-surface/30 rounded-lg p-6 border border-white/10"
+            >
+              <h3 className="text-xl font-semibold font-heading text-white mb-4 flex items-center gap-2">
+                <Brain className="w-5 h-5 text-primary" />
+                Key Takeaways
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {JSON.parse(currentContent.keyTakeaways).map((takeaway: any, index: number) => (
+                  <div key={takeaway.id || index} className="flex items-start gap-3 p-3 bg-white/5 rounded-lg">
+                    <div className="w-8 h-8 bg-primary/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+                      <span className="text-primary text-sm">💡</span>
+                    </div>
+                    <span className="text-gray-300 text-sm">{takeaway.text}</span>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+
+          {/* Downloadable Notes */}
+          {currentContent.downloadableNotes && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              className="bg-surface/30 rounded-lg p-6 border border-white/10"
+            >
+              <h3 className="text-xl font-semibold font-heading text-white mb-4 flex items-center gap-2">
+                <FileText className="w-5 h-5 text-primary" />
+                Course Materials
+              </h3>
+              <Button
+                asChild
+                variant="outline"
+                className="border-primary/30 text-primary hover:bg-primary/10"
+              >
+                <a href={currentContent.downloadableNotes} target="_blank" rel="noopener noreferrer">
+                  <Download className="w-4 h-4 mr-2" />
+                  Download Notes
+                </a>
+              </Button>
+            </motion.div>
+          )}
+
+          {/* Activity Section */}
+          {showActivity && (
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              className="mt-12"
+            >
+              <div className="mb-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <ActivityIcon className="w-6 h-6 text-primary" />
+                  <h2 className="text-2xl font-bold font-heading text-white">
+                    Interactive Activity
+                  </h2>
+                </div>
+                <p className="font-paragraph text-gray-400">
+                  Apply what you've learned in this hands-on activity.
+                </p>
+              </div>
+              
+              <ActivityComponent
+                activity={mockActivity}
+                onComplete={handleActivityComplete}
+                onProgress={(progress) => console.log('Activity progress:', progress)}
+              />
+            </motion.div>
+          )}
+        </div>
+      );
+    }
+
+    // All other content types use scroll-based learning modules
+    if (contentType === 'module' || contentType === 'scroll' || contentType === 'text' || !contentType) {
       // Enhance content with mock data for demonstration if no real data exists
       const enhancedContent = {
         ...currentContent,
@@ -380,10 +515,11 @@ function CoursePlayerContent() {
 
   const getContentIcon = (type: string) => {
     switch (type?.toLowerCase()) {
+      case 'video':
+        return Video;
       case 'module':
       case 'scroll':
       case 'text':
-      case 'video': // Convert video to module icon
         return BookOpen;
       case 'activity':
         return ActivityIcon;
